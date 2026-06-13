@@ -1,0 +1,67 @@
+vocabulary:
+  - term: Environment
+    definition: >-
+      A deployment target within Coalesce that maps to a Snowflake database or
+      schema. Environments hold deployed versions of nodes and are where pipeline
+      runs execute. Typical environments include Development, Staging, and Production.
+
+  - term: Node
+    definition: >-
+      A data object in Coalesce representing a transformation unit such as a
+      table, view, materialized view, dynamic table, or external table in
+      Snowflake. Nodes encapsulate SQL logic and column-level documentation.
+
+  - term: Run
+    definition: >-
+      An execution of the transformation pipeline in an environment. A run
+      processes nodes in dependency order, materializing data objects in
+      Snowflake. Runs can be triggered via the API, CI/CD pipelines, or the
+      Coalesce UI.
+
+  - term: Workspace
+    definition: >-
+      A developer's personal working area in Coalesce for building and editing
+      nodes before they are committed and deployed to a shared environment.
+
+  - term: Project
+    definition: >-
+      A top-level organizational unit in Coalesce that groups related
+      environments, workspaces, and nodes. Projects connect to a Git repository
+      for version control.
+
+  - term: Git Account
+    definition: >-
+      A Git integration configured in Coalesce that allows projects to be backed
+      by source control (GitHub, GitLab, Bitbucket). Git accounts store
+      credentials for committing and pulling node definitions.
+
+  - term: runCounter
+    definition: >-
+      A monotonically increasing integer that uniquely identifies each pipeline
+      run within a Coalesce environment. Used to check run status, retry failures,
+      and cancel active runs via the Scheduler API.
+
+  - term: Scheduler API
+    definition: >-
+      The subset of the Coalesce API responsible for controlling pipeline
+      execution. Endpoints include startRun, runStatus, rerun, and cancelRun.
+      The base URL for scheduler endpoints is https://app.coalescesoftware.io/scheduler/.
+
+  - term: Bearer Token
+    definition: >-
+      The authentication credential required for all Coalesce API calls. Generated
+      from the Deploy tab in the Coalesce application. Tokens never expire and
+      are passed via the Authorization header as "Bearer <token>".
+
+  - term: Cursor Pagination
+    definition: >-
+      The pagination mechanism used by Coalesce list endpoints. Responses include
+      a `next` field containing a cursor value. Pass this value as `startingFrom`
+      in the next request to retrieve the following page. A null `next` indicates
+      the final page.
+
+  - term: Parallelism
+    definition: >-
+      A run parameter that controls the maximum number of nodes that Coalesce
+      will materialize concurrently in a single pipeline run. Higher parallelism
+      can reduce run time but increases Snowflake compute consumption.

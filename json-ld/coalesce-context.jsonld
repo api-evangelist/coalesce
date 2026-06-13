@@ -1,0 +1,60 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "coalesce": "https://coalesce.io/vocab#",
+    "id": "@id",
+    "type": "@type",
+
+    "Environment": "coalesce:Environment",
+    "environmentID": "coalesce:environmentID",
+    "environmentName": "coalesce:environmentName",
+    "environmentStatus": "coalesce:environmentStatus",
+
+    "Node": "coalesce:Node",
+    "nodeID": "coalesce:nodeID",
+    "nodeName": "coalesce:nodeName",
+    "nodeType": "coalesce:nodeType",
+    "workspaceID": "coalesce:workspaceID",
+
+    "Run": "coalesce:Run",
+    "runCounter": "coalesce:runCounter",
+    "runStatus": "coalesce:runStatus",
+    "startedAt": {
+      "@id": "coalesce:startedAt",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+    "completedAt": {
+      "@id": "coalesce:completedAt",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+
+    "Project": "coalesce:Project",
+    "projectID": "coalesce:projectID",
+    "projectName": "coalesce:projectName",
+
+    "GitAccount": "coalesce:GitAccount",
+    "gitAccountID": "coalesce:gitAccountID",
+    "provider": "coalesce:gitProvider",
+
+    "User": "schema:Person",
+    "userID": "schema:identifier",
+    "email": "schema:email",
+    "name": "schema:name",
+
+    "createdAt": {
+      "@id": "schema:dateCreated",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+    "createdBy": "schema:creator",
+    "updatedAt": {
+      "@id": "schema:dateModified",
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+    },
+
+    "data": "schema:ItemList",
+    "next": "coalesce:paginationCursor",
+    "parallelism": "coalesce:parallelism",
+    "parameters": "coalesce:runParameters",
+    "rowsAffected": "coalesce:rowsAffected"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/coalesce/main/json-schema/node.json",
+  "title": "Node",
+  "description": "A Coalesce transformation node representing a data object (table, view, materialized view, etc.) in an environment or workspace.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique node identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Node name"
+    },
+    "type": {
+      "type": "string",
+      "description": "Node type (e.g., table, view, materialized view)"
+    },
+    "environmentID": {
+      "type": "string",
+      "description": "Associated environment ID"
+    },
+    "workspaceID": {
+      "type": "string",
+      "description": "Associated workspace ID"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the node was created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the node was last updated"
+    }
+  },
+  "required": ["id", "name", "type"]
+}

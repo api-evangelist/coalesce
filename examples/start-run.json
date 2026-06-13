@@ -1,0 +1,26 @@
+{
+  "title": "Start Run Example",
+  "description": "Example request and response for starting a Coalesce pipeline run",
+  "request": {
+    "method": "POST",
+    "url": "https://app.coalescesoftware.io/scheduler/startRun",
+    "headers": {
+      "accept": "application/json",
+      "authorization": "Bearer <your-access-token>",
+      "content-type": "application/json"
+    },
+    "body": {
+      "environmentID": "env-abc123",
+      "parallelism": 16,
+      "parameters": {
+        "MY_PARAM": "my_value"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "runCounter": 42
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/coalesce/main/json-schema/environment.json",
+  "title": "Environment",
+  "description": "A Coalesce deployment environment that contains nodes and is associated with a project.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique environment identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Environment name"
+    },
+    "status": {
+      "type": "string",
+      "description": "Environment status"
+    },
+    "project": {
+      "type": "string",
+      "description": "Associated project ID"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the environment was created"
+    },
+    "createdBy": {
+      "type": "string",
+      "description": "User who created the environment"
+    }
+  },
+  "required": ["id", "name"]
+}

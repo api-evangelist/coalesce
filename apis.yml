@@ -44,7 +44,7 @@ apis:
       - type: Documentation
         url: https://docs.coalesce.io/docs/api
       - type: OpenAPI
-        url: https://docs.coalesce.io/docs/api
+        url: https://raw.githubusercontent.com/api-evangelist/coalesce/refs/heads/main/openapi/openapi.yml
 common:
   - type: Website
     url: https://coalesce.io

@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/coalesce/main/json-schema/run.json",
+  "title": "Run",
+  "description": "A Coalesce pipeline run that tracks execution of transformation nodes in an environment.",
+  "type": "object",
+  "properties": {
+    "runCounter": {
+      "type": "integer",
+      "description": "Unique run counter / ID"
+    },
+    "status": {
+      "type": "string",
+      "description": "Run status",
+      "enum": ["queued", "running", "success", "failed", "cancelled"]
+    },
+    "environmentID": {
+      "type": "string",
+      "description": "Environment the run executed in"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the run started"
+    },
+    "completedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Timestamp when the run completed; null if still running"
+    }
+  },
+  "required": ["runCounter", "status", "environmentID"]
+}
