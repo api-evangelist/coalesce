@@ -1,0 +1,75 @@
+aid: coalesce
+name: Coalesce
+description: >-
+  Coalesce is a unified data transformation platform built for Snowflake that
+  combines transformation, cataloging, and quality monitoring into a single
+  operating layer. It provides REST APIs for managing projects, environments,
+  nodes, deployments, runs, and column-level documentation in data warehouse
+  pipelines, enabling teams to automate runs, query metadata, and integrate
+  Coalesce into CI/CD workflows.
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+url: >-
+  https://raw.githubusercontent.com/api-evangelist/coalesce/refs/heads/main/apis.yml
+created: "2026-06-13"
+modified: "2026-06-13"
+specificationVersion: "0.19"
+tags:
+  - Data Transformation
+  - Snowflake
+  - Data Pipelines
+  - Data Catalog
+  - Data Quality
+  - Analytics
+  - AI
+apis:
+  - aid: coalesce:coalesce-api
+    name: Coalesce API
+    description: >-
+      REST API for integrating with Coalesce and scaling your application.
+      Enables automation of pipeline runs, querying metadata about nodes and
+      environments, user management, git account configuration, project
+      management, and CI/CD integration for data warehouse transformation
+      pipelines built on Snowflake.
+    image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    humanURL: https://docs.coalesce.io/docs/api
+    baseURL: https://app.coalescesoftware.io/api/v1
+    tags:
+      - Data Transformation
+      - Environments
+      - Nodes
+      - Runs
+      - Projects
+      - Deployments
+    properties:
+      - type: Documentation
+        url: https://docs.coalesce.io/docs/api
+      - type: OpenAPI
+        url: https://docs.coalesce.io/docs/api
+common:
+  - type: Website
+    url: https://coalesce.io
+  - type: Documentation
+    url: https://docs.coalesce.io/docs
+  - type: GitHubOrg
+    url: https://github.com/coalesceio
+  - type: GitHubOrg
+    url: https://github.com/Coalesce-Software-Inc
+  - type: LinkedIn
+    url: https://www.linkedin.com/company/coalesceio
+  - type: Blog
+    url: https://coalesce.io/resources/
+  - type: Pricing
+    url: https://coalesce.io/product/pricing/
+  - type: StatusPage
+    url: https://status.coalesce.io/
+  - type: X
+    url: https://x.com/coalesceIO
+  - type: Plans
+    url: plans/coalesce-plans-pricing.yml
+  - type: RateLimits
+    url: rate-limits/coalesce-rate-limits.yml
+  - type: FinOps
+    url: finops/coalesce-finops.yml
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com

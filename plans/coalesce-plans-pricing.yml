@@ -1,0 +1,78 @@
+name: Coalesce Plans and Pricing
+description: >-
+  Coalesce uses a credit-based pricing model with a single credit currency
+  across all platform features including Transform, Catalog, and Quality.
+  Development is always free; credits are only consumed when pipelines run in
+  production. Plans are billed annually.
+url: https://coalesce.io/product/pricing/
+plans:
+  - name: Starter
+    description: >-
+      Full platform access for small teams getting started with data
+      transformation on Snowflake. Includes Transform, Catalog, and Quality
+      modules with a fixed monthly credit allowance.
+    url: https://coalesce.io/product/pricing/
+    price: 500.00
+    unit: month
+    currency: USD
+    billingCycle: annually
+    features:
+      - 2,000 credits per month
+      - Up to 5 users
+      - 1 project
+      - 2 environments
+      - 2 integrations
+      - 10 hours of Field Data Engineering onboarding included
+      - Full platform access (Transform, Catalog, Quality)
+      - Development always free (credits only consumed in production)
+    limits:
+      users: 5
+      projects: 1
+      environments: 2
+      integrations: 2
+      creditsPerMonth: 2000
+
+  - name: Enterprise
+    description: >-
+      Scalable plan for growing teams with volume-based rate discounts and
+      unlimited users, projects, and environments. Pricing based on credit
+      commitment with better per-credit rates as usage scales.
+    url: https://coalesce.io/product/pricing/
+    price: contact
+    unit: month
+    currency: USD
+    billingCycle: annually
+    features:
+      - All Starter features
+      - Unlimited users
+      - Unlimited projects
+      - Unlimited environments
+      - More credits per dollar as usage scales
+      - Volume-based rate discounts
+      - Custom credit commitment tiers
+    limits:
+      users: unlimited
+      projects: unlimited
+      environments: unlimited
+
+  - name: Business Critical
+    description: >-
+      Enterprise plan plus advanced security, compliance, and private
+      connectivity. Designed for regulated industries requiring HIPAA readiness,
+      PrivateLink, and custom deployment configurations.
+    url: https://coalesce.io/product/pricing/
+    price: contact
+    unit: month
+    currency: USD
+    billingCycle: annually
+    features:
+      - All Enterprise features
+      - PrivateLink connectivity
+      - BAA (HIPAA-ready)
+      - Advanced security and compliance controls
+      - Custom deployment requirements
+      - Unlimited users, projects, and environments
+    limits:
+      users: unlimited
+      projects: unlimited
+      environments: unlimited

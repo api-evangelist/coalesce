@@ -1,0 +1,37 @@
+name: Coalesce API Rate Limits
+description: >-
+  Coalesce does not publicly document specific API rate limit thresholds or
+  throttling policies in their public documentation. The REST API uses bearer
+  token authentication and follows standard REST conventions. For rate limit
+  details specific to your deployment, contact Coalesce support or refer to
+  your subscription agreement. The API base URL varies by instance and region.
+url: https://docs.coalesce.io/docs/api
+authentication:
+  type: Bearer Token
+  description: >-
+    All API requests require a bearer token in the Authorization header.
+    Format: Authorization: Bearer [your-access-token]
+  tokenAcquisition: https://docs.coalesce.io/docs/api
+baseURL: https://app.coalescesoftware.io/api/v1
+notes:
+  - >-
+    The base URL may differ for your specific Coalesce instance; update to
+    your app address before making requests.
+  - >-
+    The API supports JSON request and response bodies (accept: application/json).
+  - >-
+    Coalesce hosts infrastructure across multiple AWS, GCP, and Azure regions;
+    the base URL may vary per deployment region.
+  - >-
+    No publicly documented rate limits have been found as of June 2026. Contact
+    support@coalesce.io for throttling policies applicable to your plan.
+rateLimits:
+  documented: false
+  source: https://docs.coalesce.io/docs/api
+  notes: >-
+    Coalesce has not published explicit rate limit thresholds in their public
+    API documentation. Rate limiting behavior, if any, is enforced at the
+    infrastructure level across regional deployments on AWS, GCP, and Azure.
+contact:
+  support: support@coalesce.io
+  statusPage: https://status.coalesce.io/

@@ -1,0 +1,63 @@
+name: Coalesce FinOps
+description: >-
+  Coalesce uses a unified credit-based billing model across all platform
+  capabilities. Credits are the single currency for Transform node executions,
+  Catalog asset management, and Quality checks. Development environments are
+  always free — credits are only consumed when pipelines run in production,
+  making it straightforward to track and optimize cloud spend.
+url: https://coalesce.io/product/pricing/
+costModel:
+  type: credit-based
+  currency: credits
+  description: >-
+    A single credit type covers all Coalesce platform activities: pipeline
+    execution (Transform), data catalog assets (Catalog), and automated quality
+    checks (Quality). This unified model eliminates the need for separate
+    budgets across platform features.
+  productionOnly: true
+  developmentCost: free
+  notes:
+    - >-
+      Credits are not consumed during development or testing; production
+      pipeline runs trigger credit usage.
+    - >-
+      The Starter plan provides 2,000 credits/month at $500/month billed
+      annually (~$0.25 per credit at list price).
+    - >-
+      Enterprise and Business Critical plans offer volume discounts — more
+      credits per dollar as usage scales — negotiated via credit commitment.
+creditUsage:
+  transform:
+    description: Credits consumed per node execution when pipelines run in production
+    unit: per node execution
+  catalog:
+    description: Credits consumed for catalog asset management and AI-assisted discovery
+    unit: per catalog asset
+  quality:
+    description: Credits consumed for automated quality checks and Scout AI agent runs
+    unit: per quality check
+costOptimizationTips:
+  - >-
+    Use development environments freely for testing and iteration; only
+    production runs consume credits.
+  - >-
+    Upgrade to Enterprise or Business Critical for volume discounts if monthly
+    credit consumption regularly exceeds the 2,000 Starter allocation.
+  - >-
+    Leverage Coalesce's metadata-driven approach to minimize redundant node
+    executions by reusing common transformation logic across pipelines.
+  - >-
+    Monitor pipeline run frequency via the Runs API to identify and eliminate
+    unnecessary scheduled executions consuming credits.
+  - >-
+    Use the Environments API to audit inactive environments and consolidate
+    workloads, reducing per-run overhead.
+billingReferences:
+  - type: PricingPage
+    url: https://coalesce.io/product/pricing/
+  - type: Documentation
+    url: https://docs.coalesce.io/docs
+  - type: StatusPage
+    url: https://status.coalesce.io/
+  - type: SupportContact
+    value: support@coalesce.io
