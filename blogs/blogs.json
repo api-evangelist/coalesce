@@ -2,6 +2,13 @@
   "repo": "coalesce",
   "feeds": [
     {
+      "source": "https://coalesce.io/resources/feed/",
+      "feed_url": "https://coalesce.io/resources/feed/",
+      "title": "",
+      "saved": 1,
+      "method": "feed"
+    },
+    {
       "source": "https://www.linkedin.com/company/coalesceio",
       "feed_url": "https://www.linkedin.com/company/coalesceio",
       "title": "",
@@ -9,6 +16,6 @@
       "method": "none"
     }
   ],
-  "post_count": 0,
-  "fetched": "2026-06-14T20:42:17Z"
+  "post_count": 1,
+  "fetched": "2026-06-27T12:03:07Z"
 }
