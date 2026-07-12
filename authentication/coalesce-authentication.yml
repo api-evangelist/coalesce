@@ -1,0 +1,14 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/openapi.yml
+summary:
+  types:
+  - http
+schemes:
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens
+    never expire and remain valid across all environments and projects.
+  sources:
+  - openapi/openapi.yml
