@@ -46,6 +46,8 @@ apis:
       - type: OpenAPI
         url: https://raw.githubusercontent.com/api-evangelist/coalesce/refs/heads/main/openapi/openapi.yml
 common:
+  - type: AgenticAccess
+    url: agentic-access/coalesce-agentic-access.yml
   - type: TrustCenter
     url: security/coalesce-trust-center.yml
   - type: DomainSecurity
