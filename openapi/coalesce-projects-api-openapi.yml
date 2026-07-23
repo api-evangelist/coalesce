@@ -1,0 +1,243 @@
+openapi: 3.0.3
+info:
+  title: Coalesce Environments Projects API
+  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
+  version: '1'
+  contact:
+    name: Coalesce Support
+    email: support@coalesce.io
+    url: https://docs.coalesce.io/docs/api
+  x-api-id: coalesce-api
+  x-audience: public
+servers:
+- url: https://app.coalescesoftware.io/api/v1
+  description: US (default)
+- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
+  description: US East (AWS)
+- url: https://app.eu.coalescesoftware.io/api/v1
+  description: Europe
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
+  description: Canada (GCP)
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
+  description: Australia (GCP)
+security:
+- bearerAuth: []
+tags:
+- name: Projects
+  description: Manage Coalesce projects
+paths:
+  /projects:
+    get:
+      operationId: listProjects
+      summary: List Projects
+      description: Returns a paginated list of projects in the organization.
+      tags:
+      - Projects
+      parameters:
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/orderByParam'
+      - $ref: '#/components/parameters/orderByDirectionParam'
+      - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createProject
+      summary: Create Project
+      description: Creates a new project in the organization.
+      tags:
+      - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        '200':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /projects/{projectID}:
+    parameters:
+    - name: projectID
+      in: path
+      required: true
+      description: Unique identifier of the project
+      schema:
+        type: string
+    get:
+      operationId: getProject
+      summary: Get Project
+      description: Returns details for a specific project.
+      tags:
+      - Projects
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: updateProject
+      summary: Update Project
+      description: Updates a specific project.
+      tags:
+      - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteProject
+      summary: Delete Project
+      description: Deletes a specific project.
+      tags:
+      - Projects
+      responses:
+        '204':
+          description: Project deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  parameters:
+    startingFromParam:
+      name: startingFrom
+      in: query
+      description: Cursor value from the previous response's `next` field for pagination
+      required: false
+      schema:
+        type: string
+    orderByDirectionParam:
+      name: orderByDirection
+      in: query
+      description: Sort direction
+      required: false
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
+        default: asc
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+  schemas:
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type: string
+          nullable: true
+          description: Cursor for the next page of results; null when exhausted
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique project identifier
+        name:
+          type: string
+          description: Project name
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the project was created
+        createdBy:
+          type: string
+          description: User who created the project
+    ProjectList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Project'
+    ProjectInput:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: Project name
+        description:
+          type: string
+          description: Project description
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.

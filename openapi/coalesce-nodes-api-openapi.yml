@@ -1,0 +1,336 @@
+openapi: 3.0.3
+info:
+  title: Coalesce Environments Nodes API
+  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
+  version: '1'
+  contact:
+    name: Coalesce Support
+    email: support@coalesce.io
+    url: https://docs.coalesce.io/docs/api
+  x-api-id: coalesce-api
+  x-audience: public
+servers:
+- url: https://app.coalescesoftware.io/api/v1
+  description: US (default)
+- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
+  description: US East (AWS)
+- url: https://app.eu.coalescesoftware.io/api/v1
+  description: Europe
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
+  description: Canada (GCP)
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
+  description: Australia (GCP)
+security:
+- bearerAuth: []
+tags:
+- name: Nodes
+  description: Manage environment and workspace nodes
+paths:
+  /environments/{environmentID}/nodes:
+    get:
+      operationId: listEnvironmentNodes
+      summary: List Environment Nodes
+      description: Returns a paginated list of nodes in a specific environment.
+      tags:
+      - Nodes
+      parameters:
+      - name: environmentID
+        in: path
+        required: true
+        description: Unique identifier of the environment
+        schema:
+          type: string
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/orderByParam'
+      - $ref: '#/components/parameters/orderByDirectionParam'
+      - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /environments/{environmentID}/nodes/{nodeID}:
+    parameters:
+    - name: environmentID
+      in: path
+      required: true
+      description: Unique identifier of the environment
+      schema:
+        type: string
+    - name: nodeID
+      in: path
+      required: true
+      description: Unique identifier of the node
+      schema:
+        type: string
+    get:
+      operationId: getEnvironmentNode
+      summary: Get Environment Node
+      description: Returns details for a specific node in an environment.
+      tags:
+      - Nodes
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /workspaces/{workspaceID}/nodes:
+    get:
+      operationId: listWorkspaceNodes
+      summary: List Workspace Nodes
+      description: Returns a paginated list of nodes in a specific workspace.
+      tags:
+      - Nodes
+      parameters:
+      - name: workspaceID
+        in: path
+        required: true
+        description: Unique identifier of the workspace
+        schema:
+          type: string
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/orderByParam'
+      - $ref: '#/components/parameters/orderByDirectionParam'
+      - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createWorkspaceNode
+      summary: Create Workspace Node
+      description: Creates a new node in the specified workspace.
+      tags:
+      - Nodes
+      parameters:
+      - name: workspaceID
+        in: path
+        required: true
+        description: Unique identifier of the workspace
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeInput'
+      responses:
+        '200':
+          description: Node created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /workspaces/{workspaceID}/nodes/{nodeID}:
+    parameters:
+    - name: workspaceID
+      in: path
+      required: true
+      description: Unique identifier of the workspace
+      schema:
+        type: string
+    - name: nodeID
+      in: path
+      required: true
+      description: Unique identifier of the node
+      schema:
+        type: string
+    get:
+      operationId: getWorkspaceNode
+      summary: Get Workspace Node
+      description: Returns details for a specific node in a workspace.
+      tags:
+      - Nodes
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: setWorkspaceNode
+      summary: Set Workspace Node
+      description: Updates (sets) a specific node in a workspace.
+      tags:
+      - Nodes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeInput'
+      responses:
+        '200':
+          description: Node updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteWorkspaceNode
+      summary: Delete Workspace Node
+      description: Deletes a specific node from a workspace.
+      tags:
+      - Nodes
+      responses:
+        '204':
+          description: Node deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  schemas:
+    NodeInput:
+      type: object
+      required:
+      - name
+      - type
+      properties:
+        name:
+          type: string
+          description: Node name
+        type:
+          type: string
+          description: Node type
+        description:
+          type: string
+          description: Node description / documentation
+    Node:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique node identifier
+        name:
+          type: string
+          description: Node name
+        type:
+          type: string
+          description: Node type (e.g., table, view, materialized view)
+        environmentID:
+          type: string
+          description: Associated environment ID
+        workspaceID:
+          type: string
+          description: Associated workspace ID
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the node was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the node was last updated
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type: string
+          nullable: true
+          description: Cursor for the next page of results; null when exhausted
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    NodeList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Node'
+  parameters:
+    startingFromParam:
+      name: startingFrom
+      in: query
+      description: Cursor value from the previous response's `next` field for pagination
+      required: false
+      schema:
+        type: string
+    orderByDirectionParam:
+      name: orderByDirection
+      in: query
+      description: Sort direction
+      required: false
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
+        default: asc
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.

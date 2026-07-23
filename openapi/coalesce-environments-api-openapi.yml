@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: Coalesce Environments API
+  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
+  version: '1'
+  contact:
+    name: Coalesce Support
+    email: support@coalesce.io
+    url: https://docs.coalesce.io/docs/api
+  x-api-id: coalesce-api
+  x-audience: public
+servers:
+- url: https://app.coalescesoftware.io/api/v1
+  description: US (default)
+- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
+  description: US East (AWS)
+- url: https://app.eu.coalescesoftware.io/api/v1
+  description: Europe
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
+  description: Canada (GCP)
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
+  description: Australia (GCP)
+security:
+- bearerAuth: []
+tags:
+- name: Environments
+  description: Manage Coalesce deployment environments
+paths:
+  /environments:
+    get:
+      operationId: listEnvironments
+      summary: List Environments
+      description: Returns a paginated list of environments in the organization.
+      tags:
+      - Environments
+      parameters:
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/orderByParam'
+      - $ref: '#/components/parameters/orderByDirectionParam'
+      - $ref: '#/components/parameters/startingFromParam'
+      - name: detail
+        in: query
+        description: Whether to return full environment detail
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createEnvironment
+      summary: Create Environment
+      description: Creates a new environment in the organization.
+      tags:
+      - Environments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentInput'
+      responses:
+        '200':
+          description: Environment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /environments/{environmentID}:
+    parameters:
+    - name: environmentID
+      in: path
+      required: true
+      description: Unique identifier of the environment
+      schema:
+        type: string
+    get:
+      operationId: getEnvironment
+      summary: Get Environment
+      description: Returns details for a specific environment.
+      tags:
+      - Environments
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: updateEnvironment
+      summary: Update Environment
+      description: Updates a specific environment.
+      tags:
+      - Environments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentInput'
+      responses:
+        '200':
+          description: Environment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteEnvironment
+      summary: Delete Environment
+      description: Deletes a specific environment.
+      tags:
+      - Environments
+      responses:
+        '204':
+          description: Environment deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  parameters:
+    startingFromParam:
+      name: startingFrom
+      in: query
+      description: Cursor value from the previous response's `next` field for pagination
+      required: false
+      schema:
+        type: string
+    orderByDirectionParam:
+      name: orderByDirection
+      in: query
+      description: Sort direction
+      required: false
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
+        default: asc
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+  schemas:
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type: string
+          nullable: true
+          description: Cursor for the next page of results; null when exhausted
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    EnvironmentInput:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: Environment name
+        project:
+          type: string
+          description: Associated project ID
+    Environment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique environment identifier
+        name:
+          type: string
+          description: Environment name
+        status:
+          type: string
+          description: Environment status
+        project:
+          type: string
+          description: Associated project ID
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the environment was created
+        createdBy:
+          type: string
+          description: User who created the environment
+    EnvironmentList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Environment'
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.

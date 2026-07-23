@@ -1,0 +1,247 @@
+openapi: 3.0.3
+info:
+  title: Coalesce Environments Git Accounts API
+  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
+  version: '1'
+  contact:
+    name: Coalesce Support
+    email: support@coalesce.io
+    url: https://docs.coalesce.io/docs/api
+  x-api-id: coalesce-api
+  x-audience: public
+servers:
+- url: https://app.coalescesoftware.io/api/v1
+  description: US (default)
+- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
+  description: US East (AWS)
+- url: https://app.eu.coalescesoftware.io/api/v1
+  description: Europe
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
+  description: Canada (GCP)
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
+  description: Australia (GCP)
+security:
+- bearerAuth: []
+tags:
+- name: Git Accounts
+  description: Manage Git account integrations
+paths:
+  /gitAccounts:
+    get:
+      operationId: listGitAccounts
+      summary: List Git Accounts
+      description: Returns a paginated list of Git accounts configured in the organization.
+      tags:
+      - Git Accounts
+      parameters:
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/orderByParam'
+      - $ref: '#/components/parameters/orderByDirectionParam'
+      - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitAccountList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createGitAccount
+      summary: Create Git Account
+      description: Creates a new Git account integration.
+      tags:
+      - Git Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitAccountInput'
+      responses:
+        '200':
+          description: Git account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitAccount'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /gitAccounts/{gitAccountID}:
+    parameters:
+    - name: gitAccountID
+      in: path
+      required: true
+      description: Unique identifier of the Git account
+      schema:
+        type: string
+    get:
+      operationId: getGitAccount
+      summary: Get Git Account
+      description: Returns details for a specific Git account.
+      tags:
+      - Git Accounts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitAccount'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: updateGitAccount
+      summary: Update Git Account
+      description: Updates a specific Git account.
+      tags:
+      - Git Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitAccountInput'
+      responses:
+        '200':
+          description: Git account updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitAccount'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteGitAccount
+      summary: Delete Git Account
+      description: Deletes a specific Git account integration.
+      tags:
+      - Git Accounts
+      responses:
+        '204':
+          description: Git account deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  parameters:
+    startingFromParam:
+      name: startingFrom
+      in: query
+      description: Cursor value from the previous response's `next` field for pagination
+      required: false
+      schema:
+        type: string
+    orderByDirectionParam:
+      name: orderByDirection
+      in: query
+      description: Sort direction
+      required: false
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
+        default: asc
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+  schemas:
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type: string
+          nullable: true
+          description: Cursor for the next page of results; null when exhausted
+    GitAccountInput:
+      type: object
+      required:
+      - provider
+      - username
+      properties:
+        provider:
+          type: string
+          description: Git provider (github, gitlab, bitbucket)
+        username:
+          type: string
+          description: Git account username
+        token:
+          type: string
+          description: Personal access token for the Git account (write-only)
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    GitAccountList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/GitAccount'
+    GitAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique Git account identifier
+        provider:
+          type: string
+          description: Git provider (e.g., github, gitlab, bitbucket)
+        username:
+          type: string
+          description: Git account username
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the account was created
+  responses:
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.
