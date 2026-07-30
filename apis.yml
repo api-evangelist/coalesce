@@ -7,7 +7,20 @@ description: >-
   nodes, deployments, runs, and column-level documentation in data warehouse
   pipelines, enabling teams to automate runs, query metadata, and integrate
   Coalesce into CI/CD workflows.
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: paid
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Paid · Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/coalesce.png
 url: >-
   https://raw.githubusercontent.com/api-evangelist/coalesce/refs/heads/main/apis.yml
 created: "2026-06-13"
@@ -22,29 +35,90 @@ tags:
   - Analytics
   - AI
 apis:
-  - aid: coalesce:coalesce-api
-    name: Coalesce API
-    description: >-
-      REST API for integrating with Coalesce and scaling your application.
-      Enables automation of pipeline runs, querying metadata about nodes and
-      environments, user management, git account configuration, project
-      management, and CI/CD integration for data warehouse transformation
-      pipelines built on Snowflake.
-    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
-    humanURL: https://docs.coalesce.io/docs/api
-    baseURL: https://app.coalescesoftware.io/api/v1
-    tags:
-      - Data Transformation
-      - Environments
-      - Nodes
-      - Runs
-      - Projects
-      - Deployments
-    properties:
-      - type: Documentation
-        url: https://docs.coalesce.io/docs/api
-      - type: OpenAPI
-        url: https://raw.githubusercontent.com/api-evangelist/coalesce/refs/heads/main/openapi/openapi.yml
+- aid: coalesce:coalesce-environments-api
+  name: Coalesce Environments API
+  description: Manage Coalesce deployment environments
+  humanURL: https://docs.coalesce.io/docs/api
+  baseURL: https://app.coalescesoftware.io/api/v1
+  tags:
+  - Environments
+  properties:
+  - type: OpenAPI
+    url: openapi/coalesce-environments-api-openapi.yml
+  - type: Documentation
+    url: https://docs.coalesce.io/docs/api
+- aid: coalesce:coalesce-git-accounts-api
+  name: Coalesce Git Accounts API
+  description: Manage Git account integrations
+  humanURL: https://docs.coalesce.io/docs/api
+  baseURL: https://app.coalescesoftware.io/api/v1
+  tags:
+  - Git Accounts
+  properties:
+  - type: OpenAPI
+    url: openapi/coalesce-git-accounts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.coalesce.io/docs/api
+- aid: coalesce:coalesce-nodes-api
+  name: Coalesce Nodes API
+  description: Manage environment and workspace nodes
+  humanURL: https://docs.coalesce.io/docs/api
+  baseURL: https://app.coalescesoftware.io/api/v1
+  tags:
+  - Nodes
+  properties:
+  - type: OpenAPI
+    url: openapi/coalesce-nodes-api-openapi.yml
+  - type: Documentation
+    url: https://docs.coalesce.io/docs/api
+- aid: coalesce:coalesce-projects-api
+  name: Coalesce Projects API
+  description: Manage Coalesce projects
+  humanURL: https://docs.coalesce.io/docs/api
+  baseURL: https://app.coalescesoftware.io/api/v1
+  tags:
+  - Projects
+  properties:
+  - type: OpenAPI
+    url: openapi/coalesce-projects-api-openapi.yml
+  - type: Documentation
+    url: https://docs.coalesce.io/docs/api
+- aid: coalesce:coalesce-runs-api
+  name: Coalesce Runs API
+  description: List and inspect pipeline run records
+  humanURL: https://docs.coalesce.io/docs/api
+  baseURL: https://app.coalescesoftware.io/api/v1
+  tags:
+  - Runs
+  properties:
+  - type: OpenAPI
+    url: openapi/coalesce-runs-api-openapi.yml
+  - type: Documentation
+    url: https://docs.coalesce.io/docs/api
+- aid: coalesce:coalesce-scheduler-api
+  name: Coalesce Scheduler API
+  description: Start, stop, retry, and monitor pipeline runs
+  humanURL: https://docs.coalesce.io/docs/api
+  baseURL: https://app.coalescesoftware.io/api/v1
+  tags:
+  - Scheduler
+  properties:
+  - type: OpenAPI
+    url: openapi/coalesce-scheduler-api-openapi.yml
+  - type: Documentation
+    url: https://docs.coalesce.io/docs/api
+- aid: coalesce:coalesce-users-api
+  name: Coalesce Users API
+  description: Manage organization users and roles
+  humanURL: https://docs.coalesce.io/docs/api
+  baseURL: https://app.coalescesoftware.io/api/v1
+  tags:
+  - Users
+  properties:
+  - type: OpenAPI
+    url: openapi/coalesce-users-api-openapi.yml
+  - type: Documentation
+    url: https://docs.coalesce.io/docs/api
 common:
   - type: AgenticAccess
     url: agentic-access/coalesce-agentic-access.yml
