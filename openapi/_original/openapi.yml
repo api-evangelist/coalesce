@@ -1,0 +1,1350 @@
+openapi: 3.0.3
+info:
+  title: Coalesce API
+  description: >-
+    REST API for integrating with Coalesce, a unified data transformation
+    platform built for Snowflake. Enables automation of pipeline runs, querying
+    metadata about nodes and environments, user management, git account
+    configuration, project management, and CI/CD integration for data warehouse
+    transformation pipelines.
+  version: "1"
+  contact:
+    name: Coalesce Support
+    email: support@coalesce.io
+    url: https://docs.coalesce.io/docs/api
+  x-api-id: coalesce-api
+  x-audience: public
+
+servers:
+  - url: https://app.coalescesoftware.io/api/v1
+    description: US (default)
+  - url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
+    description: US East (AWS)
+  - url: https://app.eu.coalescesoftware.io/api/v1
+    description: Europe
+  - url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
+    description: Canada (GCP)
+  - url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
+    description: Australia (GCP)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Environments
+    description: Manage Coalesce deployment environments
+  - name: Nodes
+    description: Manage environment and workspace nodes
+  - name: Runs
+    description: List and inspect pipeline run records
+  - name: Scheduler
+    description: Start, stop, retry, and monitor pipeline runs
+  - name: Projects
+    description: Manage Coalesce projects
+  - name: Users
+    description: Manage organization users and roles
+  - name: Git Accounts
+    description: Manage Git account integrations
+
+paths:
+  /environments:
+    get:
+      operationId: listEnvironments
+      summary: List Environments
+      description: Returns a paginated list of environments in the organization.
+      tags:
+        - Environments
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/orderByParam'
+        - $ref: '#/components/parameters/orderByDirectionParam'
+        - $ref: '#/components/parameters/startingFromParam'
+        - name: detail
+          in: query
+          description: Whether to return full environment detail
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createEnvironment
+      summary: Create Environment
+      description: Creates a new environment in the organization.
+      tags:
+        - Environments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentInput'
+      responses:
+        "200":
+          description: Environment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /environments/{environmentID}:
+    parameters:
+      - name: environmentID
+        in: path
+        required: true
+        description: Unique identifier of the environment
+        schema:
+          type: string
+    get:
+      operationId: getEnvironment
+      summary: Get Environment
+      description: Returns details for a specific environment.
+      tags:
+        - Environments
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: updateEnvironment
+      summary: Update Environment
+      description: Updates a specific environment.
+      tags:
+        - Environments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentInput'
+      responses:
+        "200":
+          description: Environment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteEnvironment
+      summary: Delete Environment
+      description: Deletes a specific environment.
+      tags:
+        - Environments
+      responses:
+        "204":
+          description: Environment deleted
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /environments/{environmentID}/nodes:
+    get:
+      operationId: listEnvironmentNodes
+      summary: List Environment Nodes
+      description: Returns a paginated list of nodes in a specific environment.
+      tags:
+        - Nodes
+      parameters:
+        - name: environmentID
+          in: path
+          required: true
+          description: Unique identifier of the environment
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/orderByParam'
+        - $ref: '#/components/parameters/orderByDirectionParam'
+        - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /environments/{environmentID}/nodes/{nodeID}:
+    parameters:
+      - name: environmentID
+        in: path
+        required: true
+        description: Unique identifier of the environment
+        schema:
+          type: string
+      - name: nodeID
+        in: path
+        required: true
+        description: Unique identifier of the node
+        schema:
+          type: string
+    get:
+      operationId: getEnvironmentNode
+      summary: Get Environment Node
+      description: Returns details for a specific node in an environment.
+      tags:
+        - Nodes
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /workspaces/{workspaceID}/nodes:
+    get:
+      operationId: listWorkspaceNodes
+      summary: List Workspace Nodes
+      description: Returns a paginated list of nodes in a specific workspace.
+      tags:
+        - Nodes
+      parameters:
+        - name: workspaceID
+          in: path
+          required: true
+          description: Unique identifier of the workspace
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/orderByParam'
+        - $ref: '#/components/parameters/orderByDirectionParam'
+        - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createWorkspaceNode
+      summary: Create Workspace Node
+      description: Creates a new node in the specified workspace.
+      tags:
+        - Nodes
+      parameters:
+        - name: workspaceID
+          in: path
+          required: true
+          description: Unique identifier of the workspace
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeInput'
+      responses:
+        "200":
+          description: Node created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /workspaces/{workspaceID}/nodes/{nodeID}:
+    parameters:
+      - name: workspaceID
+        in: path
+        required: true
+        description: Unique identifier of the workspace
+        schema:
+          type: string
+      - name: nodeID
+        in: path
+        required: true
+        description: Unique identifier of the node
+        schema:
+          type: string
+    get:
+      operationId: getWorkspaceNode
+      summary: Get Workspace Node
+      description: Returns details for a specific node in a workspace.
+      tags:
+        - Nodes
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: setWorkspaceNode
+      summary: Set Workspace Node
+      description: Updates (sets) a specific node in a workspace.
+      tags:
+        - Nodes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeInput'
+      responses:
+        "200":
+          description: Node updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteWorkspaceNode
+      summary: Delete Workspace Node
+      description: Deletes a specific node from a workspace.
+      tags:
+        - Nodes
+      responses:
+        "204":
+          description: Node deleted
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /runs:
+    get:
+      operationId: listRuns
+      summary: List Runs
+      description: Returns a paginated list of pipeline runs.
+      tags:
+        - Runs
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/orderByParam'
+        - $ref: '#/components/parameters/orderByDirectionParam'
+        - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /runs/{runID}:
+    parameters:
+      - name: runID
+        in: path
+        required: true
+        description: Unique identifier of the run
+        schema:
+          type: string
+    get:
+      operationId: getRun
+      summary: Get Run
+      description: Returns details for a specific pipeline run.
+      tags:
+        - Runs
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /runs/{runID}/results:
+    get:
+      operationId: listRunResults
+      summary: List Run Results
+      description: Returns the results for a specific pipeline run.
+      tags:
+        - Runs
+      parameters:
+        - name: runID
+          in: path
+          required: true
+          description: Unique identifier of the run
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResultList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /scheduler/startRun:
+    post:
+      operationId: startRun
+      summary: Start Run
+      description: >-
+        Create and start a new pipeline run. Triggers execution of transformation
+        nodes in the specified environment.
+      tags:
+        - Scheduler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartRunRequest'
+      responses:
+        "200":
+          description: Run started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunReference'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /scheduler/runStatus:
+    get:
+      operationId: getRunStatus
+      summary: Get Run Status
+      description: Get the status of a specific run by run ID.
+      tags:
+        - Scheduler
+      parameters:
+        - name: runCounter
+          in: query
+          required: true
+          description: The run counter (ID) to check status for
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Run status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunStatus'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /scheduler/rerun:
+    post:
+      operationId: retryRun
+      summary: Retry Failed Run
+      description: >-
+        Retry a run from the point of failure. This endpoint starts the run
+        again and runs only the nodes that failed.
+      tags:
+        - Scheduler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RerunRequest'
+      responses:
+        "200":
+          description: Run retried successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunReference'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /scheduler/cancelRun:
+    post:
+      operationId: cancelRun
+      summary: Cancel Active Run
+      description: Cancel a currently active (running) pipeline run.
+      tags:
+        - Scheduler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRunRequest'
+      responses:
+        "204":
+          description: Run cancelled successfully
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /projects:
+    get:
+      operationId: listProjects
+      summary: List Projects
+      description: Returns a paginated list of projects in the organization.
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/orderByParam'
+        - $ref: '#/components/parameters/orderByDirectionParam'
+        - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createProject
+      summary: Create Project
+      description: Creates a new project in the organization.
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        "200":
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /projects/{projectID}:
+    parameters:
+      - name: projectID
+        in: path
+        required: true
+        description: Unique identifier of the project
+        schema:
+          type: string
+    get:
+      operationId: getProject
+      summary: Get Project
+      description: Returns details for a specific project.
+      tags:
+        - Projects
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: updateProject
+      summary: Update Project
+      description: Updates a specific project.
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        "200":
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteProject
+      summary: Delete Project
+      description: Deletes a specific project.
+      tags:
+        - Projects
+      responses:
+        "204":
+          description: Project deleted
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /users:
+    get:
+      operationId: listUsers
+      summary: List Organization Users
+      description: Returns a paginated list of users in the organization.
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/orderByParam'
+        - $ref: '#/components/parameters/orderByDirectionParam'
+        - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/{userID}/roles/org:
+    parameters:
+      - name: userID
+        in: path
+        required: true
+        description: Unique identifier of the user
+        schema:
+          type: string
+    put:
+      operationId: setUserOrgRole
+      summary: Set User Organization Role
+      description: Assigns or updates a user's organization-level role.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleInput'
+      responses:
+        "200":
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteUserOrgRole
+      summary: Delete User Organization Role
+      description: Removes a user's organization-level role.
+      tags:
+        - Users
+      responses:
+        "204":
+          description: Role removed
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/{userID}/roles/project/{projectID}:
+    parameters:
+      - name: userID
+        in: path
+        required: true
+        description: Unique identifier of the user
+        schema:
+          type: string
+      - name: projectID
+        in: path
+        required: true
+        description: Unique identifier of the project
+        schema:
+          type: string
+    put:
+      operationId: setUserProjectRole
+      summary: Set User Project Role
+      description: Assigns or updates a user's project-level role.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleInput'
+      responses:
+        "200":
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteUserProjectRole
+      summary: Delete User Project Role
+      description: Removes a user's project-level role.
+      tags:
+        - Users
+      responses:
+        "204":
+          description: Role removed
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/{userID}/roles/environment/{environmentID}:
+    parameters:
+      - name: userID
+        in: path
+        required: true
+        description: Unique identifier of the user
+        schema:
+          type: string
+      - name: environmentID
+        in: path
+        required: true
+        description: Unique identifier of the environment
+        schema:
+          type: string
+    put:
+      operationId: setUserEnvironmentRole
+      summary: Set User Environment Role
+      description: Assigns or updates a user's environment-level role.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleInput'
+      responses:
+        "200":
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteUserEnvironmentRole
+      summary: Delete User Environment Role
+      description: Removes a user's environment-level role.
+      tags:
+        - Users
+      responses:
+        "204":
+          description: Role removed
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /gitAccounts:
+    get:
+      operationId: listGitAccounts
+      summary: List Git Accounts
+      description: Returns a paginated list of Git accounts configured in the organization.
+      tags:
+        - Git Accounts
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/orderByParam'
+        - $ref: '#/components/parameters/orderByDirectionParam'
+        - $ref: '#/components/parameters/startingFromParam'
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitAccountList'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createGitAccount
+      summary: Create Git Account
+      description: Creates a new Git account integration.
+      tags:
+        - Git Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitAccountInput'
+      responses:
+        "200":
+          description: Git account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitAccount'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /gitAccounts/{gitAccountID}:
+    parameters:
+      - name: gitAccountID
+        in: path
+        required: true
+        description: Unique identifier of the Git account
+        schema:
+          type: string
+    get:
+      operationId: getGitAccount
+      summary: Get Git Account
+      description: Returns details for a specific Git account.
+      tags:
+        - Git Accounts
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitAccount'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      operationId: updateGitAccount
+      summary: Update Git Account
+      description: Updates a specific Git account.
+      tags:
+        - Git Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitAccountInput'
+      responses:
+        "200":
+          description: Git account updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitAccount'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: deleteGitAccount
+      summary: Delete Git Account
+      description: Deletes a specific Git account integration.
+      tags:
+        - Git Accounts
+      responses:
+        "204":
+          description: Git account deleted
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >-
+        Bearer token obtained from the Deploy tab in the Coalesce application.
+        Tokens never expire and remain valid across all environments and projects.
+
+  parameters:
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+    orderByDirectionParam:
+      name: orderByDirection
+      in: query
+      description: Sort direction
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+    startingFromParam:
+      name: startingFrom
+      in: query
+      description: Cursor value from the previous response's `next` field for pagination
+      required: false
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type: string
+          nullable: true
+          description: Cursor for the next page of results; null when exhausted
+
+    Environment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique environment identifier
+        name:
+          type: string
+          description: Environment name
+        status:
+          type: string
+          description: Environment status
+        project:
+          type: string
+          description: Associated project ID
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the environment was created
+        createdBy:
+          type: string
+          description: User who created the environment
+
+    EnvironmentInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Environment name
+        project:
+          type: string
+          description: Associated project ID
+
+    EnvironmentList:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Environment'
+
+    Node:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique node identifier
+        name:
+          type: string
+          description: Node name
+        type:
+          type: string
+          description: Node type (e.g., table, view, materialized view)
+        environmentID:
+          type: string
+          description: Associated environment ID
+        workspaceID:
+          type: string
+          description: Associated workspace ID
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the node was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the node was last updated
+
+    NodeInput:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          description: Node name
+        type:
+          type: string
+          description: Node type
+        description:
+          type: string
+          description: Node description / documentation
+
+    NodeList:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Node'
+
+    Run:
+      type: object
+      properties:
+        runCounter:
+          type: integer
+          description: Unique run counter / ID
+        status:
+          type: string
+          description: Run status
+          enum: [queued, running, success, failed, cancelled]
+        environmentID:
+          type: string
+          description: Environment the run executed in
+        startedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the run started
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the run completed
+
+    RunList:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Run'
+
+    RunResult:
+      type: object
+      properties:
+        nodeID:
+          type: string
+          description: Node identifier
+        nodeName:
+          type: string
+          description: Node name
+        status:
+          type: string
+          description: Result status for this node
+        rowsAffected:
+          type: integer
+          description: Number of rows affected
+
+    RunResultList:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RunResult'
+
+    StartRunRequest:
+      type: object
+      required:
+        - environmentID
+      properties:
+        environmentID:
+          type: string
+          description: ID of the environment to run
+        jobID:
+          type: string
+          description: Optional job configuration ID
+        parallelism:
+          type: integer
+          description: Maximum number of nodes to run in parallel
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+          description: Key-value pairs of runtime parameters passed to the run
+
+    RerunRequest:
+      type: object
+      required:
+        - runCounter
+      properties:
+        runCounter:
+          type: integer
+          description: The run counter of the failed run to retry
+
+    CancelRunRequest:
+      type: object
+      required:
+        - runCounter
+      properties:
+        runCounter:
+          type: integer
+          description: The run counter of the active run to cancel
+
+    RunReference:
+      type: object
+      properties:
+        runCounter:
+          type: integer
+          description: Unique identifier / counter for the started run
+
+    RunStatus:
+      type: object
+      properties:
+        runCounter:
+          type: integer
+          description: Run counter
+        status:
+          type: string
+          description: Current run status
+          enum: [queued, running, success, failed, cancelled]
+        startedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the run started
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the run completed
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique project identifier
+        name:
+          type: string
+          description: Project name
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the project was created
+        createdBy:
+          type: string
+          description: User who created the project
+
+    ProjectInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Project name
+        description:
+          type: string
+          description: Project description
+
+    ProjectList:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Project'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User's email address
+        name:
+          type: string
+          description: User's display name
+        orgRole:
+          type: string
+          description: Organization-level role
+
+    UserList:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+
+    UserRole:
+      type: object
+      properties:
+        userID:
+          type: string
+          description: User identifier
+        role:
+          type: string
+          description: Assigned role name
+        scope:
+          type: string
+          description: Role scope (org, project, environment)
+
+    RoleInput:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          description: Role name to assign
+
+    GitAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique Git account identifier
+        provider:
+          type: string
+          description: Git provider (e.g., github, gitlab, bitbucket)
+        username:
+          type: string
+          description: Git account username
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the account was created
+
+    GitAccountInput:
+      type: object
+      required:
+        - provider
+        - username
+      properties:
+        provider:
+          type: string
+          description: Git provider (github, gitlab, bitbucket)
+        username:
+          type: string
+          description: Git account username
+        token:
+          type: string
+          description: Personal access token for the Git account (write-only)
+
+    GitAccountList:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/GitAccount'

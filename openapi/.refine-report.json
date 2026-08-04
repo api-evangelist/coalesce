@@ -1,0 +1,26 @@
+{
+  "provider": "coalesce",
+  "sources": [
+    "coalesce-environments-api-openapi.yml",
+    "coalesce-git-accounts-api-openapi.yml",
+    "coalesce-nodes-api-openapi.yml",
+    "coalesce-projects-api-openapi.yml",
+    "coalesce-runs-api-openapi.yml",
+    "coalesce-scheduler-api-openapi.yml",
+    "coalesce-users-api-openapi.yml"
+  ],
+  "outputs": [
+    "coalesce-environments-api-openapi.yml",
+    "coalesce-git-accounts-api-openapi.yml",
+    "coalesce-nodes-api-openapi.yml",
+    "coalesce-projects-api-openapi.yml",
+    "coalesce-runs-api-openapi.yml",
+    "coalesce-scheduler-api-openapi.yml",
+    "coalesce-users-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
