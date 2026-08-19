@@ -1,0 +1,211 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Coalesce Environments Users API",
+    "version": "1"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Users",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Organization Users",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/users",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return per page"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Field name to sort results by"
+              },
+              {
+                "name": "orderByDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction"
+              },
+              {
+                "name": "startingFrom",
+                "value": "",
+                "type": "query",
+                "description": "Cursor value from the previous response's `next` field for pagination"
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of users in the organization."
+        },
+        {
+          "info": {
+            "name": "Set User Organization Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://app.coalescesoftware.io/api/v1/users/:userID/roles/org",
+            "params": [
+              {
+                "name": "userID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the user"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Assigns or updates a user's organization-level role."
+        },
+        {
+          "info": {
+            "name": "Delete User Organization Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://app.coalescesoftware.io/api/v1/users/:userID/roles/org",
+            "params": [
+              {
+                "name": "userID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the user"
+              }
+            ]
+          },
+          "docs": "Removes a user's organization-level role."
+        },
+        {
+          "info": {
+            "name": "Set User Project Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://app.coalescesoftware.io/api/v1/users/:userID/roles/project/:projectID",
+            "params": [
+              {
+                "name": "userID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the user"
+              },
+              {
+                "name": "projectID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the project"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Assigns or updates a user's project-level role."
+        },
+        {
+          "info": {
+            "name": "Delete User Project Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://app.coalescesoftware.io/api/v1/users/:userID/roles/project/:projectID",
+            "params": [
+              {
+                "name": "userID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the user"
+              },
+              {
+                "name": "projectID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the project"
+              }
+            ]
+          },
+          "docs": "Removes a user's project-level role."
+        },
+        {
+          "info": {
+            "name": "Set User Environment Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://app.coalescesoftware.io/api/v1/users/:userID/roles/environment/:environmentID",
+            "params": [
+              {
+                "name": "userID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the user"
+              },
+              {
+                "name": "environmentID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the environment"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Assigns or updates a user's environment-level role."
+        },
+        {
+          "info": {
+            "name": "Delete User Environment Role",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://app.coalescesoftware.io/api/v1/users/:userID/roles/environment/:environmentID",
+            "params": [
+              {
+                "name": "userID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the user"
+              },
+              {
+                "name": "environmentID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the environment"
+              }
+            ]
+          },
+          "docs": "Removes a user's environment-level role."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

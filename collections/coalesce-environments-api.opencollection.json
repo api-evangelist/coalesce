@@ -1,0 +1,143 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Coalesce Environments API",
+    "version": "1"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Environments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Environments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/environments",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return per page"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Field name to sort results by"
+              },
+              {
+                "name": "orderByDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction"
+              },
+              {
+                "name": "startingFrom",
+                "value": "",
+                "type": "query",
+                "description": "Cursor value from the previous response's `next` field for pagination"
+              },
+              {
+                "name": "detail",
+                "value": "",
+                "type": "query",
+                "description": "Whether to return full environment detail"
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of environments in the organization."
+        },
+        {
+          "info": {
+            "name": "Create Environment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.coalescesoftware.io/api/v1/environments",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new environment in the organization."
+        },
+        {
+          "info": {
+            "name": "Get Environment",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/environments/:environmentID",
+            "params": [
+              {
+                "name": "environmentID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the environment"
+              }
+            ]
+          },
+          "docs": "Returns details for a specific environment."
+        },
+        {
+          "info": {
+            "name": "Update Environment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://app.coalescesoftware.io/api/v1/environments/:environmentID",
+            "params": [
+              {
+                "name": "environmentID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the environment"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a specific environment."
+        },
+        {
+          "info": {
+            "name": "Delete Environment",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://app.coalescesoftware.io/api/v1/environments/:environmentID",
+            "params": [
+              {
+                "name": "environmentID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the environment"
+              }
+            ]
+          },
+          "docs": "Deletes a specific environment."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

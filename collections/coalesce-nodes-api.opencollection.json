@@ -1,0 +1,237 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Coalesce Environments Nodes API",
+    "version": "1"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Nodes",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Environment Nodes",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/environments/:environmentID/nodes",
+            "params": [
+              {
+                "name": "environmentID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the environment"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return per page"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Field name to sort results by"
+              },
+              {
+                "name": "orderByDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction"
+              },
+              {
+                "name": "startingFrom",
+                "value": "",
+                "type": "query",
+                "description": "Cursor value from the previous response's `next` field for pagination"
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of nodes in a specific environment."
+        },
+        {
+          "info": {
+            "name": "Get Environment Node",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/environments/:environmentID/nodes/:nodeID",
+            "params": [
+              {
+                "name": "environmentID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the environment"
+              },
+              {
+                "name": "nodeID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the node"
+              }
+            ]
+          },
+          "docs": "Returns details for a specific node in an environment."
+        },
+        {
+          "info": {
+            "name": "List Workspace Nodes",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/workspaces/:workspaceID/nodes",
+            "params": [
+              {
+                "name": "workspaceID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the workspace"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return per page"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Field name to sort results by"
+              },
+              {
+                "name": "orderByDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction"
+              },
+              {
+                "name": "startingFrom",
+                "value": "",
+                "type": "query",
+                "description": "Cursor value from the previous response's `next` field for pagination"
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of nodes in a specific workspace."
+        },
+        {
+          "info": {
+            "name": "Create Workspace Node",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.coalescesoftware.io/api/v1/workspaces/:workspaceID/nodes",
+            "params": [
+              {
+                "name": "workspaceID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the workspace"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new node in the specified workspace."
+        },
+        {
+          "info": {
+            "name": "Get Workspace Node",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/workspaces/:workspaceID/nodes/:nodeID",
+            "params": [
+              {
+                "name": "workspaceID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the workspace"
+              },
+              {
+                "name": "nodeID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the node"
+              }
+            ]
+          },
+          "docs": "Returns details for a specific node in a workspace."
+        },
+        {
+          "info": {
+            "name": "Set Workspace Node",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://app.coalescesoftware.io/api/v1/workspaces/:workspaceID/nodes/:nodeID",
+            "params": [
+              {
+                "name": "workspaceID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the workspace"
+              },
+              {
+                "name": "nodeID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the node"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates (sets) a specific node in a workspace."
+        },
+        {
+          "info": {
+            "name": "Delete Workspace Node",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://app.coalescesoftware.io/api/v1/workspaces/:workspaceID/nodes/:nodeID",
+            "params": [
+              {
+                "name": "workspaceID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the workspace"
+              },
+              {
+                "name": "nodeID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the node"
+              }
+            ]
+          },
+          "docs": "Deletes a specific node from a workspace."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

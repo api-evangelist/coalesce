@@ -1,0 +1,137 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Coalesce Environments Git Accounts API",
+    "version": "1"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Git Accounts",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Git Accounts",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/gitAccounts",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return per page"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Field name to sort results by"
+              },
+              {
+                "name": "orderByDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction"
+              },
+              {
+                "name": "startingFrom",
+                "value": "",
+                "type": "query",
+                "description": "Cursor value from the previous response's `next` field for pagination"
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of Git accounts configured in the organization."
+        },
+        {
+          "info": {
+            "name": "Create Git Account",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.coalescesoftware.io/api/v1/gitAccounts",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new Git account integration."
+        },
+        {
+          "info": {
+            "name": "Get Git Account",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/gitAccounts/:gitAccountID",
+            "params": [
+              {
+                "name": "gitAccountID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the Git account"
+              }
+            ]
+          },
+          "docs": "Returns details for a specific Git account."
+        },
+        {
+          "info": {
+            "name": "Update Git Account",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://app.coalescesoftware.io/api/v1/gitAccounts/:gitAccountID",
+            "params": [
+              {
+                "name": "gitAccountID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the Git account"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a specific Git account."
+        },
+        {
+          "info": {
+            "name": "Delete Git Account",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://app.coalescesoftware.io/api/v1/gitAccounts/:gitAccountID",
+            "params": [
+              {
+                "name": "gitAccountID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the Git account"
+              }
+            ]
+          },
+          "docs": "Deletes a specific Git account integration."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,88 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Coalesce Environments Scheduler API",
+    "version": "1"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Scheduler",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Start Run",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.coalescesoftware.io/api/v1/scheduler/startRun",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create and start a new pipeline run. Triggers execution of transformation nodes in the specified environment."
+        },
+        {
+          "info": {
+            "name": "Get Run Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/scheduler/runStatus",
+            "params": [
+              {
+                "name": "runCounter",
+                "value": "",
+                "type": "query",
+                "description": "The run counter (ID) to check status for"
+              }
+            ]
+          },
+          "docs": "Get the status of a specific run by run ID."
+        },
+        {
+          "info": {
+            "name": "Retry Failed Run",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.coalescesoftware.io/api/v1/scheduler/rerun",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Retry a run from the point of failure. This endpoint starts the run again and runs only the nodes that failed."
+        },
+        {
+          "info": {
+            "name": "Cancel Active Run",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://app.coalescesoftware.io/api/v1/scheduler/cancelRun",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Cancel a currently active (running) pipeline run."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,99 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Coalesce Environments Runs API",
+    "version": "1"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Runs",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Runs",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/runs",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of results to return per page"
+              },
+              {
+                "name": "orderBy",
+                "value": "",
+                "type": "query",
+                "description": "Field name to sort results by"
+              },
+              {
+                "name": "orderByDirection",
+                "value": "",
+                "type": "query",
+                "description": "Sort direction"
+              },
+              {
+                "name": "startingFrom",
+                "value": "",
+                "type": "query",
+                "description": "Cursor value from the previous response's `next` field for pagination"
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of pipeline runs."
+        },
+        {
+          "info": {
+            "name": "Get Run",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/runs/:runID",
+            "params": [
+              {
+                "name": "runID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the run"
+              }
+            ]
+          },
+          "docs": "Returns details for a specific pipeline run."
+        },
+        {
+          "info": {
+            "name": "List Run Results",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://app.coalescesoftware.io/api/v1/runs/:runID/results",
+            "params": [
+              {
+                "name": "runID",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier of the run"
+              }
+            ]
+          },
+          "docs": "Returns the results for a specific pipeline run."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
