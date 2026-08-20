@@ -29,6 +29,14 @@ specificationVersion: '0.23'
 tags:
   - Data Transformation
   - Snowflake
+  - Data Pipeline
+  - Data Catalog
+  - Data Quality
+  - Analytics
+  - Artificial Intelligence
+tags_raw:
+  - Data Transformation
+  - Snowflake
   - Data Pipelines
   - Data Catalog
   - Data Quality
@@ -77,6 +85,8 @@ apis:
   humanURL: https://docs.coalesce.io/docs/api
   baseURL: https://app.coalescesoftware.io/api/v1
   tags:
+  - Project
+  tags_raw:
   - Projects
   properties:
   - type: OpenAPI
@@ -113,6 +123,8 @@ apis:
   humanURL: https://docs.coalesce.io/docs/api
   baseURL: https://app.coalescesoftware.io/api/v1
   tags:
+  - User
+  tags_raw:
   - Users
   properties:
   - type: OpenAPI
