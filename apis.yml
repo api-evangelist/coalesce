@@ -62,6 +62,8 @@ apis:
   humanURL: https://docs.coalesce.io/docs/api
   baseURL: https://app.coalescesoftware.io/api/v1
   tags:
+  - Environment
+  tags_raw:
   - Environments
   properties:
   - type: OpenAPI
@@ -86,6 +88,8 @@ apis:
   humanURL: https://docs.coalesce.io/docs/api
   baseURL: https://app.coalescesoftware.io/api/v1
   tags:
+  - Node
+  tags_raw:
   - Nodes
   properties:
   - type: OpenAPI
