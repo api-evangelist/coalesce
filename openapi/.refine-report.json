@@ -1,13 +1,7 @@
 {
   "provider": "coalesce",
   "sources": [
-    "coalesce-environments-api-openapi.yml",
-    "coalesce-git-accounts-api-openapi.yml",
-    "coalesce-nodes-api-openapi.yml",
-    "coalesce-projects-api-openapi.yml",
-    "coalesce-runs-api-openapi.yml",
-    "coalesce-scheduler-api-openapi.yml",
-    "coalesce-users-api-openapi.yml"
+    "_original/openapi.yml"
   ],
   "outputs": [
     "coalesce-environments-api-openapi.yml",
@@ -21,6 +15,18 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "openapi.yml: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "coalesce-environments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "coalesce-git-accounts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "coalesce-nodes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "coalesce-projects-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "coalesce-runs-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "coalesce-scheduler-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "coalesce-users-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

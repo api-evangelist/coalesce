@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
   title: Coalesce Environments API
   description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
@@ -141,6 +141,19 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
     startingFromParam:
       name: startingFrom
@@ -149,6 +162,20 @@ components:
       required: false
       schema:
         type: string
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
     orderByDirectionParam:
       name: orderByDirection
       in: query
@@ -160,51 +187,7 @@ components:
         - asc
         - desc
         default: asc
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
   schemas:
-    PaginatedResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items: {}
-        next:
-          type: string
-          nullable: true
-          description: Cursor for the next page of results; null when exhausted
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    EnvironmentInput:
-      type: object
-      required:
-      - name
-      properties:
-        name:
-          type: string
-          description: Environment name
-        project:
-          type: string
-          description: Associated project ID
     Environment:
       type: object
       properties:
@@ -236,19 +219,37 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Environment'
-  responses:
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+    EnvironmentInput:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: Environment name
+        project:
+          type: string
+          description: Associated project ID
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page of results; null when exhausted
   securitySchemes:
     bearerAuth:
       type: http

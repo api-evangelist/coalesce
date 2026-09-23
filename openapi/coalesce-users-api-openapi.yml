@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: Coalesce Environments Users API
+  title: Coalesce Users API
   description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
   version: '1'
   contact:
@@ -194,6 +194,19 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
     startingFromParam:
       name: startingFrom
@@ -202,6 +215,20 @@ components:
       required: false
       schema:
         type: string
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
     orderByDirectionParam:
       name: orderByDirection
       in: query
@@ -213,21 +240,24 @@ components:
         - asc
         - desc
         default: asc
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
   schemas:
+    UserList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+    RoleInput:
+      type: object
+      required:
+      - role
+      properties:
+        role:
+          type: string
+          description: Role name to assign
     User:
       type: object
       properties:
@@ -244,6 +274,15 @@ components:
         orgRole:
           type: string
           description: Organization-level role
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
     UserRole:
       type: object
       properties:
@@ -263,48 +302,10 @@ components:
           type: array
           items: {}
         next:
-          type: string
-          nullable: true
+          type:
+          - string
+          - 'null'
           description: Cursor for the next page of results; null when exhausted
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    RoleInput:
-      type: object
-      required:
-      - role
-      properties:
-        role:
-          type: string
-          description: Role name to assign
-    UserList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/User'
-  responses:
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
   securitySchemes:
     bearerAuth:
       type: http

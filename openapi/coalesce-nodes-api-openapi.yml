@@ -1,6 +1,6 @@
-openapi: 3.0.3
+openapi: 3.2.0
 info:
-  title: Coalesce Environments Nodes API
+  title: Coalesce Nodes API
   description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
   version: '1'
   contact:
@@ -214,21 +214,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 components:
   schemas:
-    NodeInput:
-      type: object
-      required:
-      - name
-      - type
-      properties:
-        name:
-          type: string
-          description: Node name
-        type:
-          type: string
-          description: Node type
-        description:
-          type: string
-          description: Node description / documentation
     Node:
       type: object
       properties:
@@ -255,25 +240,21 @@ components:
           type: string
           format: date-time
           description: Timestamp when the node was last updated
-    PaginatedResponse:
+    NodeInput:
       type: object
+      required:
+      - name
+      - type
       properties:
-        data:
-          type: array
-          items: {}
-        next:
+        name:
           type: string
-          nullable: true
-          description: Cursor for the next page of results; null when exhausted
-    Error:
-      type: object
-      properties:
-        error:
+          description: Node name
+        type:
           type: string
-          description: Error message
-        code:
+          description: Node type
+        description:
           type: string
-          description: Error code
+          description: Node description / documentation
     NodeList:
       allOf:
       - $ref: '#/components/schemas/PaginatedResponse'
@@ -283,39 +264,26 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Node'
-  parameters:
-    startingFromParam:
-      name: startingFrom
-      in: query
-      description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByDirectionParam:
-      name: orderByDirection
-      in: query
-      description: Sort direction
-      required: false
-      schema:
-        type: string
-        enum:
-        - asc
-        - desc
-        default: asc
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page of results; null when exhausted
   responses:
     BadRequest:
       description: Bad request
@@ -329,6 +297,39 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+  parameters:
+    startingFromParam:
+      name: startingFrom
+      in: query
+      description: Cursor value from the previous response's `next` field for pagination
+      required: false
+      schema:
+        type: string
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
+    orderByDirectionParam:
+      name: orderByDirection
+      in: query
+      description: Sort direction
+      required: false
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
+        default: asc
   securitySchemes:
     bearerAuth:
       type: http
