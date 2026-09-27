@@ -194,6 +194,72 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page of results; null when exhausted
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User's email address
+        name:
+          type: string
+          description: User's display name
+        orgRole:
+          type: string
+          description: Organization-level role
+    RoleInput:
+      type: object
+      required:
+      - role
+      properties:
+        role:
+          type: string
+          description: Role name to assign
+    UserList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+    UserRole:
+      type: object
+      properties:
+        userID:
+          type: string
+          description: User identifier
+        role:
+          type: string
+          description: Assigned role name
+        scope:
+          type: string
+          description: Role scope (org, project, environment)
   responses:
     BadRequest:
       description: Bad request
@@ -222,13 +288,6 @@ components:
       required: false
       schema:
         type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
     orderByDirectionParam:
       name: orderByDirection
       in: query
@@ -240,72 +299,13 @@ components:
         - asc
         - desc
         default: asc
-  schemas:
-    UserList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/User'
-    RoleInput:
-      type: object
-      required:
-      - role
-      properties:
-        role:
-          type: string
-          description: Role name to assign
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique user identifier
-        email:
-          type: string
-          format: email
-          description: User's email address
-        name:
-          type: string
-          description: User's display name
-        orgRole:
-          type: string
-          description: Organization-level role
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    UserRole:
-      type: object
-      properties:
-        userID:
-          type: string
-          description: User identifier
-        role:
-          type: string
-          description: Assigned role name
-        scope:
-          type: string
-          description: Role scope (org, project, environment)
-    PaginatedResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items: {}
-        next:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page of results; null when exhausted
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
   securitySchemes:
     bearerAuth:
       type: http

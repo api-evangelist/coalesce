@@ -141,6 +141,69 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 components:
+  schemas:
+    EnvironmentInput:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: Environment name
+        project:
+          type: string
+          description: Associated project ID
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    EnvironmentList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Environment'
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page of results; null when exhausted
+    Environment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique environment identifier
+        name:
+          type: string
+          description: Environment name
+        status:
+          type: string
+          description: Environment status
+        project:
+          type: string
+          description: Associated project ID
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the environment was created
+        createdBy:
+          type: string
+          description: User who created the environment
   responses:
     BadRequest:
       description: Bad request
@@ -169,13 +232,6 @@ components:
       required: false
       schema:
         type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
     orderByDirectionParam:
       name: orderByDirection
       in: query
@@ -187,69 +243,13 @@ components:
         - asc
         - desc
         default: asc
-  schemas:
-    Environment:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique environment identifier
-        name:
-          type: string
-          description: Environment name
-        status:
-          type: string
-          description: Environment status
-        project:
-          type: string
-          description: Associated project ID
-        createdAt:
-          type: string
-          format: date-time
-          description: Timestamp when the environment was created
-        createdBy:
-          type: string
-          description: User who created the environment
-    EnvironmentList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Environment'
-    EnvironmentInput:
-      type: object
-      required:
-      - name
-      properties:
-        name:
-          type: string
-          description: Environment name
-        project:
-          type: string
-          description: Associated project ID
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    PaginatedResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items: {}
-        next:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page of results; null when exhausted
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
   securitySchemes:
     bearerAuth:
       type: http

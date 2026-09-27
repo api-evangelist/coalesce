@@ -39,6 +39,10 @@ url: >-
 created: "2026-06-13"
 modified: "2026-06-13"
 specificationVersion: '0.23'
+x-docs-platform: docusaurus
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-09-24
+x-docs-hosting: netlify
 tags:
   - Data Transformation
   - Snowflake

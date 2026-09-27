@@ -135,6 +135,42 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+    GitAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique Git account identifier
+        provider:
+          type: string
+          description: Git provider (e.g., github, gitlab, bitbucket)
+        username:
+          type: string
+          description: Git account username
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the account was created
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: {}
+        next:
+          type:
+          - string
+          - 'null'
+          description: Cursor for the next page of results; null when exhausted
     GitAccountInput:
       type: object
       required:
@@ -159,42 +195,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/GitAccount'
-    GitAccount:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique Git account identifier
-        provider:
-          type: string
-          description: Git provider (e.g., github, gitlab, bitbucket)
-        username:
-          type: string
-          description: Git account username
-        createdAt:
-          type: string
-          format: date-time
-          description: Timestamp when the account was created
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    PaginatedResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items: {}
-        next:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page of results; null when exhausted
   responses:
     BadRequest:
       description: Bad request
@@ -223,13 +223,6 @@ components:
       required: false
       schema:
         type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
     orderByDirectionParam:
       name: orderByDirection
       in: query
@@ -241,6 +234,13 @@ components:
         - asc
         - desc
         default: asc
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
   securitySchemes:
     bearerAuth:
       type: http

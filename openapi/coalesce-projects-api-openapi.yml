@@ -134,19 +134,6 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 components:
-  responses:
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
   schemas:
     ProjectInput:
       type: object
@@ -159,15 +146,15 @@ components:
         description:
           type: string
           description: Project description
-    ProjectList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Project'
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
     Project:
       type: object
       properties:
@@ -184,15 +171,6 @@ components:
         createdBy:
           type: string
           description: User who created the project
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
     PaginatedResponse:
       type: object
       properties:
@@ -204,6 +182,28 @@ components:
           - string
           - 'null'
           description: Cursor for the next page of results; null when exhausted
+    ProjectList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Project'
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
     startingFromParam:
       name: startingFrom
@@ -219,13 +219,6 @@ components:
       required: false
       schema:
         type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
     orderByDirectionParam:
       name: orderByDirection
       in: query
@@ -237,6 +230,13 @@ components:
         - asc
         - desc
         default: asc
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
   securitySchemes:
     bearerAuth:
       type: http
