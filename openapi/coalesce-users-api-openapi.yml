@@ -204,6 +204,14 @@ components:
         code:
           type: string
           description: Error code
+    RoleInput:
+      type: object
+      required:
+      - role
+      properties:
+        role:
+          type: string
+          description: Role name to assign
     PaginatedResponse:
       type: object
       properties:
@@ -215,30 +223,6 @@ components:
           - string
           - 'null'
           description: Cursor for the next page of results; null when exhausted
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique user identifier
-        email:
-          type: string
-          format: email
-          description: User's email address
-        name:
-          type: string
-          description: User's display name
-        orgRole:
-          type: string
-          description: Organization-level role
-    RoleInput:
-      type: object
-      required:
-      - role
-      properties:
-        role:
-          type: string
-          description: Role name to assign
     UserList:
       allOf:
       - $ref: '#/components/schemas/PaginatedResponse'
@@ -260,31 +244,27 @@ components:
         scope:
           type: string
           description: Role scope (org, project, environment)
-  responses:
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User's email address
+        name:
+          type: string
+          description: User's display name
+        orgRole:
+          type: string
+          description: Organization-level role
   parameters:
     startingFromParam:
       name: startingFrom
       in: query
       description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
       required: false
       schema:
         type: string
@@ -299,6 +279,13 @@ components:
         - asc
         - desc
         default: asc
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
     limitParam:
       name: limit
       in: query
@@ -306,6 +293,19 @@ components:
       required: false
       schema:
         type: integer
+  responses:
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   securitySchemes:
     bearerAuth:
       type: http

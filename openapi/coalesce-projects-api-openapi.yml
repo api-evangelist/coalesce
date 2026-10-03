@@ -135,17 +135,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 components:
   schemas:
-    ProjectInput:
-      type: object
-      required:
-      - name
-      properties:
-        name:
-          type: string
-          description: Project name
-        description:
-          type: string
-          description: Project description
     Error:
       type: object
       properties:
@@ -171,6 +160,15 @@ components:
         createdBy:
           type: string
           description: User who created the project
+    ProjectList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Project'
     PaginatedResponse:
       type: object
       properties:
@@ -182,40 +180,22 @@ components:
           - string
           - 'null'
           description: Cursor for the next page of results; null when exhausted
-    ProjectList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Project'
-  responses:
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+    ProjectInput:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          description: Project name
+        description:
+          type: string
+          description: Project description
   parameters:
     startingFromParam:
       name: startingFrom
       in: query
       description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
       required: false
       schema:
         type: string
@@ -230,6 +210,13 @@ components:
         - asc
         - desc
         default: asc
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
     limitParam:
       name: limit
       in: query
@@ -237,6 +224,19 @@ components:
       required: false
       schema:
         type: integer
+  responses:
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   securitySchemes:
     bearerAuth:
       type: http

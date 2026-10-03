@@ -144,22 +144,6 @@ components:
         code:
           type: string
           description: Error code
-    GitAccount:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique Git account identifier
-        provider:
-          type: string
-          description: Git provider (e.g., github, gitlab, bitbucket)
-        username:
-          type: string
-          description: Git account username
-        createdAt:
-          type: string
-          format: date-time
-          description: Timestamp when the account was created
     PaginatedResponse:
       type: object
       properties:
@@ -186,6 +170,22 @@ components:
         token:
           type: string
           description: Personal access token for the Git account (write-only)
+    GitAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique Git account identifier
+        provider:
+          type: string
+          description: Git provider (e.g., github, gitlab, bitbucket)
+        username:
+          type: string
+          description: Git account username
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the account was created
     GitAccountList:
       allOf:
       - $ref: '#/components/schemas/PaginatedResponse'
@@ -195,31 +195,11 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/GitAccount'
-  responses:
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
   parameters:
     startingFromParam:
       name: startingFrom
       in: query
       description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
       required: false
       schema:
         type: string
@@ -234,6 +214,13 @@ components:
         - asc
         - desc
         default: asc
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
     limitParam:
       name: limit
       in: query
@@ -241,6 +228,19 @@ components:
       required: false
       schema:
         type: integer
+  responses:
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   securitySchemes:
     bearerAuth:
       type: http

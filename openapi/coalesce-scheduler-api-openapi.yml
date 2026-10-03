@@ -130,6 +130,31 @@ components:
         code:
           type: string
           description: Error code
+    RunStatus:
+      type: object
+      properties:
+        runCounter:
+          type: integer
+          description: Run counter
+        status:
+          type: string
+          description: Current run status
+          enum:
+          - queued
+          - running
+          - success
+          - failed
+          - cancelled
+        startedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the run started
+        completedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when the run completed
     CancelRunRequest:
       type: object
       required:
@@ -157,37 +182,6 @@ components:
           additionalProperties:
             type: string
           description: Key-value pairs of runtime parameters passed to the run
-    RunStatus:
-      type: object
-      properties:
-        runCounter:
-          type: integer
-          description: Run counter
-        status:
-          type: string
-          description: Current run status
-          enum:
-          - queued
-          - running
-          - success
-          - failed
-          - cancelled
-        startedAt:
-          type: string
-          format: date-time
-          description: Timestamp when the run started
-        completedAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Timestamp when the run completed
-    RunReference:
-      type: object
-      properties:
-        runCounter:
-          type: integer
-          description: Unique identifier / counter for the started run
     RerunRequest:
       type: object
       required:
@@ -196,15 +190,21 @@ components:
         runCounter:
           type: integer
           description: The run counter of the failed run to retry
+    RunReference:
+      type: object
+      properties:
+        runCounter:
+          type: integer
+          description: Unique identifier / counter for the started run
   responses:
-    BadRequest:
-      description: Bad request
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
+    BadRequest:
+      description: Bad request
       content:
         application/json:
           schema:
