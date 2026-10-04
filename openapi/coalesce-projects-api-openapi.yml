@@ -134,6 +134,39 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 components:
+  parameters:
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
+      required: false
+      schema:
+        type: string
+    startingFromParam:
+      name: startingFrom
+      in: query
+      description: Cursor value from the previous response's `next` field for pagination
+      required: false
+      schema:
+        type: string
+    orderByDirectionParam:
+      name: orderByDirection
+      in: query
+      description: Sort direction
+      required: false
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
+        default: asc
   schemas:
     Error:
       type: object
@@ -160,15 +193,6 @@ components:
         createdBy:
           type: string
           description: User who created the project
-    ProjectList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Project'
     PaginatedResponse:
       type: object
       properties:
@@ -180,6 +204,15 @@ components:
           - string
           - 'null'
           description: Cursor for the next page of results; null when exhausted
+    ProjectList:
+      allOf:
+      - $ref: '#/components/schemas/PaginatedResponse'
+      - type: object
+        properties:
+          data:
+            type: array
+            items:
+              $ref: '#/components/schemas/Project'
     ProjectInput:
       type: object
       required:
@@ -191,48 +224,15 @@ components:
         description:
           type: string
           description: Project description
-  parameters:
-    startingFromParam:
-      name: startingFrom
-      in: query
-      description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByDirectionParam:
-      name: orderByDirection
-      in: query
-      description: Sort direction
-      required: false
-      schema:
-        type: string
-        enum:
-        - asc
-        - desc
-        default: asc
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
   responses:
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
+    BadRequest:
+      description: Bad request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
       content:
         application/json:
           schema:

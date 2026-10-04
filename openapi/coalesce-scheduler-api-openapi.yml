@@ -121,6 +121,25 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 components:
   schemas:
+    StartRunRequest:
+      type: object
+      required:
+      - environmentID
+      properties:
+        environmentID:
+          type: string
+          description: ID of the environment to run
+        jobID:
+          type: string
+          description: Optional job configuration ID
+        parallelism:
+          type: integer
+          description: Maximum number of nodes to run in parallel
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+          description: Key-value pairs of runtime parameters passed to the run
     Error:
       type: object
       properties:
@@ -130,6 +149,14 @@ components:
         code:
           type: string
           description: Error code
+    CancelRunRequest:
+      type: object
+      required:
+      - runCounter
+      properties:
+        runCounter:
+          type: integer
+          description: The run counter of the active run to cancel
     RunStatus:
       type: object
       properties:
@@ -155,33 +182,12 @@ components:
           - 'null'
           format: date-time
           description: Timestamp when the run completed
-    CancelRunRequest:
+    RunReference:
       type: object
-      required:
-      - runCounter
       properties:
         runCounter:
           type: integer
-          description: The run counter of the active run to cancel
-    StartRunRequest:
-      type: object
-      required:
-      - environmentID
-      properties:
-        environmentID:
-          type: string
-          description: ID of the environment to run
-        jobID:
-          type: string
-          description: Optional job configuration ID
-        parallelism:
-          type: integer
-          description: Maximum number of nodes to run in parallel
-        parameters:
-          type: object
-          additionalProperties:
-            type: string
-          description: Key-value pairs of runtime parameters passed to the run
+          description: Unique identifier / counter for the started run
     RerunRequest:
       type: object
       required:
@@ -190,21 +196,15 @@ components:
         runCounter:
           type: integer
           description: The run counter of the failed run to retry
-    RunReference:
-      type: object
-      properties:
-        runCounter:
-          type: integer
-          description: Unique identifier / counter for the started run
   responses:
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
+    BadRequest:
+      description: Bad request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
       content:
         application/json:
           schema:

@@ -214,15 +214,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
     Node:
       type: object
       properties:
@@ -258,6 +249,15 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Node'
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
     PaginatedResponse:
       type: object
       properties:
@@ -285,10 +285,24 @@ components:
           type: string
           description: Node description / documentation
   parameters:
+    limitParam:
+      name: limit
+      in: query
+      description: Maximum number of results to return per page
+      required: false
+      schema:
+        type: integer
     startingFromParam:
       name: startingFrom
       in: query
       description: Cursor value from the previous response's `next` field for pagination
+      required: false
+      schema:
+        type: string
+    orderByParam:
+      name: orderBy
+      in: query
+      description: Field name to sort results by
       required: false
       schema:
         type: string
@@ -303,29 +317,15 @@ components:
         - asc
         - desc
         default: asc
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
   responses:
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
+    BadRequest:
+      description: Bad request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
       content:
         application/json:
           schema:
