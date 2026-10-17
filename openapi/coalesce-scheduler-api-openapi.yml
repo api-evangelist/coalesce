@@ -121,6 +121,23 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 components:
   schemas:
+    CancelRunRequest:
+      type: object
+      required:
+      - runCounter
+      properties:
+        runCounter:
+          type: integer
+          description: The run counter of the active run to cancel
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
     StartRunRequest:
       type: object
       required:
@@ -140,23 +157,20 @@ components:
           additionalProperties:
             type: string
           description: Key-value pairs of runtime parameters passed to the run
-    Error:
+    RunReference:
       type: object
       properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    CancelRunRequest:
+        runCounter:
+          type: integer
+          description: Unique identifier / counter for the started run
+    RerunRequest:
       type: object
       required:
       - runCounter
       properties:
         runCounter:
           type: integer
-          description: The run counter of the active run to cancel
+          description: The run counter of the failed run to retry
     RunStatus:
       type: object
       properties:
@@ -182,29 +196,15 @@ components:
           - 'null'
           format: date-time
           description: Timestamp when the run completed
-    RunReference:
-      type: object
-      properties:
-        runCounter:
-          type: integer
-          description: Unique identifier / counter for the started run
-    RerunRequest:
-      type: object
-      required:
-      - runCounter
-      properties:
-        runCounter:
-          type: integer
-          description: The run counter of the failed run to retry
   responses:
-    BadRequest:
-      description: Bad request
+    Unauthorized:
+      description: Unauthorized - invalid or missing bearer token
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
+    BadRequest:
+      description: Bad request
       content:
         application/json:
           schema:
