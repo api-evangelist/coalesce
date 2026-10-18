@@ -51,5 +51,5 @@
     - connectors/applications/coalesce
     vendor_link: https://coalesce.io/
     builder: Fivetran
-  status: pending-generation
+  status: not-a-workflow
   arazzo: null
