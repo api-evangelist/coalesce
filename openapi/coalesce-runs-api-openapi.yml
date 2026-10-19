@@ -1,235 +1,776 @@
 openapi: 3.2.0
 info:
+  version: 1.0.0
   title: Coalesce Runs API
-  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
-  version: '1'
-  contact:
-    name: Coalesce Support
-    email: support@coalesce.io
-    url: https://docs.coalesce.io/docs/api
-  x-api-id: coalesce-api
-  x-audience: public
+  description: REST API for performing operations with the Coalesce backend.
 servers:
-- url: https://app.coalescesoftware.io/api/v1
-  description: US (default)
-- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
-  description: US East (AWS)
-- url: https://app.eu.coalescesoftware.io/api/v1
-  description: Europe
-- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
-  description: Canada (GCP)
-- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
-  description: Australia (GCP)
+- url: https://app.coalescesoftware.io
+  description: 'Region: us-central1'
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io
+  description: 'Region: australia-southeast1 (Sydney)'
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io
+  description: 'Region: northamerica-northeast1 (Montreal)'
+- url: https://app.eu-west-2.aws.coalescesoftware.io
+  description: 'Region: eu-west-2 (London)'
+- url: https://app.eu.coalescesoftware.io
+  description: 'Region: europe-west-3 (Frankfurt)'
+- url: https://app.europe-west1.gcp.coalescesoftware.io
+  description: 'Region: europe-west-1 (Belgium)'
+- url: https://app.us-east-1.aws.coalescesoftware.io
+  description: 'Region: us-east-1 (Virginia)'
+- url: https://app.us-east-2.aws.coalescesoftware.io
+  description: 'Region: us-east-2 (Ohio)'
+- url: https://app.us-west-2.aws.coalescesoftware.io
+  description: 'Region: us-west-2 (Oregon)'
+- url: https://app.centralus.azure.coalescesoftware.io
+  description: 'Region: centralus (Iowa)'
+- url: https://app.eastus2.azure.coalescesoftware.io
+  description: 'Region: eastus2 (Virginia)'
+- url: https://app.westus2.azure.coalescesoftware.io
+  description: 'Region: westus2 (Washington)'
+- url: https://app.southcentralus.azure.coalescesoftware.io
+  description: 'Region: southcentral (San Antonio)'
+- url: https://app.us-east4.gcp.coalescesoftware.io
+  description: 'Region: us-east4 (Virginia)'
+- url: https://app.eu-central-1.aws.coalescesoftware.io
+  description: 'Region: eu-central-1 (Frankfurt)'
 security:
-- bearerAuth: []
+- BearerAuth: []
 tags:
 - name: Runs
-  description: List and inspect pipeline run records
 paths:
-  /runs:
+  /api/v1/runs:
+    summary: Runs
+    parameters: []
     get:
-      operationId: listRuns
       summary: List Runs
-      description: Returns a paginated list of pipeline runs.
-      tags:
-      - Runs
+      description: Retrieve a list of all available Runs.
+      operationId: GetRuns
+      security:
+      - BearerAuth: []
       parameters:
-      - $ref: '#/components/parameters/limitParam'
-      - $ref: '#/components/parameters/orderByParam'
-      - $ref: '#/components/parameters/orderByDirectionParam'
-      - $ref: '#/components/parameters/startingFromParam'
+      - name: limit
+        description: The maximum number of runs to return.
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          default: 25
+        required: false
+      - name: startingFrom
+        description: 'The starting run ID, runStartTime, or runEndTime (exclusive) for paging the query results. A cursor that tells the API where to begin returning results. Use it to continue pagination from a specific point in the dataset. This value must come from the `next` field in the previous response. If you define a query cursor using `startingFrom`, you must also include the `orderBy` parameter. '
+        in: query
+        allowReserved: true
+        schema:
+          oneOf:
+          - type: integer
+            minimum: 0
+          - type: string
+            format: date-time
+        required: false
+      - name: orderBy
+        description: The field used to order results.
+        in: query
+        schema:
+          $ref: '#/components/schemas/RunsOrderBy'
+        required: false
+      - $ref: '#/components/parameters/orderByDirection'
+      - name: projectID
+        description: One or more project IDs to filter the query results.
+        in: query
+        schema:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        style: form
+        explode: true
+        required: false
+      - name: runType
+        description: One or more run types to filter the query results. Pass a single value or multiple values (repeated query parameters or an array). When passing multiple values, up to 10 per request.
+        in: query
+        schema:
+          oneOf:
+          - $ref: '#/components/schemas/RunType'
+          - type: array
+            maxItems: 10
+            items:
+              $ref: '#/components/schemas/RunType'
+        style: form
+        explode: true
+        required: false
+      - name: runStatus
+        description: One or more status values to filter the query results. Pass a single value or multiple values (repeated query parameters or an array). When passing multiple values, up to 10 per request.
+        in: query
+        schema:
+          oneOf:
+          - $ref: '#/components/schemas/RunStatus'
+          - type: array
+            maxItems: 10
+            items:
+              $ref: '#/components/schemas/RunStatus'
+        style: form
+        explode: true
+        required: false
+      - name: environmentID
+        description: One or more environment IDs to filter the query results. Pass a single value or multiple values (repeated query parameters or an array). When passing multiple values, up to 10 per request.
+        in: query
+        schema:
+          oneOf:
+          - type: string
+          - type: array
+            maxItems: 10
+            items:
+              type: string
+        style: form
+        explode: true
+        required: false
+      - name: detail
+        description: Include the full detail of the run.
+        in: query
+        schema:
+          type: boolean
+          default: false
+        required: false
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RunList'
+          $ref: '#/components/responses/RunsResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /runs/{runID}:
-    parameters:
-    - name: runID
-      in: path
-      required: true
-      description: Unique identifier of the run
-      schema:
-        type: string
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Runs
+  /api/v1/runs/{runID}:
+    summary: Run
+    parameters: []
     get:
-      operationId: getRun
       summary: Get Run
-      description: Returns details for a specific pipeline run.
-      tags:
-      - Runs
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Run'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-  /runs/{runID}/results:
-    get:
-      operationId: listRunResults
-      summary: List Run Results
-      description: Returns the results for a specific pipeline run.
-      tags:
-      - Runs
+      description: Retrieve details for a specific Run by ID.
+      operationId: GetRun
+      security:
+      - BearerAuth: []
       parameters:
       - name: runID
+        description: The run ID.
         in: path
-        required: true
-        description: Unique identifier of the run
         schema:
-          type: string
+          type: integer
+        required: true
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RunResultList'
+          $ref: '#/components/responses/RunResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Runs
+  /api/v1/runs/{runID}/results:
+    summary: Run Results
+    parameters: []
+    get:
+      summary: List Run Results
+      description: Get a collection of the results of a deploy or refresh run
+      operationId: GetRunResults
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: runID
+        description: The run ID.
+        in: path
+        schema:
+          type: integer
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/RunResultsResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Runs
 components:
+  schemas:
+    QueryResult:
+      type: object
+      additionalProperties: false
+      required:
+      - isRunning
+      - name
+      - sql
+      - status
+      - success
+      properties:
+        endTime:
+          type: string
+          format: date-time
+        error:
+          $ref: '#/components/schemas/Error'
+        isRunning:
+          type: boolean
+          description: If the queried run is still running.
+        name:
+          type: string
+          description: The name of the Stage the query ran on.
+        queryID:
+          type: string
+        rowsDeleted:
+          type: integer
+        rowsInserted:
+          type: integer
+        rowsUpdated:
+          type: integer
+        sql:
+          type: string
+          description: The SQL query run during the stage.
+        startTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          description: The query status.
+        success:
+          type: boolean
+          description: If the query results were run successfully.
+        warehouse:
+          type: string
+          description: Name of the warehouse.
+        type:
+          type: string
+          x-stoplight:
+            id: xr3wlbk4jdyq9
+          example: sql
+          description: Returns either `sql` or `sqlTest` to indicate the query result type. `sql` is the stage. `sqlTest` indicates that a Node or Column test was run.
+    OrderByDirection:
+      description: The sort order for query results.
+      type: string
+      enum:
+      - asc
+      - desc
+    RefreshRunDetails:
+      type: object
+      additionalProperties: false
+      description: Refresh run details.
+      properties:
+        canceled:
+          type: boolean
+          description: If the run was canceled.
+        environmentID:
+          type: string
+          description: The Environment ID for this run.
+        excludeNodesSelector:
+          type: string
+          description: A selector string of nodes to exclude.
+        forceIgnoreEnvironmentStatus:
+          type: boolean
+        includeNodesSelector:
+          type: string
+          description: A selector string of nodes to include.
+        jobID:
+          type: integer
+          description: The Job ID.
+        parallelism:
+          type: integer
+          description: The parallelism parameter determines how many nodes are processed simultaneously (in parallel) by the Snowflake compute warehouse.
+        refreshDescription:
+          type: string
+          description: The Job name.
+        nodesInRun:
+          type: integer
+          description: The number of Nodes deployed.
+        executor:
+          type: string
+      required:
+      - environmentID
+    RunInfo:
+      description: The full details of a run, without the run results.
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - runDetails
+      - runStatus
+      - runTimeParameters
+      - runType
+      properties:
+        id:
+          type: integer
+        reRunID:
+          type: string
+          description: If this is a re-run, the ID of the original operation.
+        runDetails:
+          $ref: '#/components/schemas/RunDetails'
+        runEndTime:
+          format: date-time
+          type: string
+          description: The datetime when the run ended.
+        runHistory:
+          type: array
+          items:
+            type: integer
+        runStartTime:
+          format: date-time
+          type: string
+          description: The datetime the run started.
+        runStatus:
+          $ref: '#/components/schemas/RunStatus'
+        runTimeParameters:
+          type: object
+          description: The Job parameters. Parameters changed during deploy will not show here.
+        runType:
+          $ref: '#/components/schemas/RunType'
+        userCredentials:
+          oneOf:
+          - $ref: '#/components/schemas/SnowflakeUserCredentials'
+            x-stoplight:
+              id: pa71hghwa05uw
+          - $ref: '#/components/schemas/DatabricksUserCredentials'
+            x-stoplight:
+              id: uslefxelcfngk
+        userID:
+          type: string
+        hasTestFailures:
+          type: boolean
+          x-stoplight:
+            id: jjkw1cc309kyj
+          description: If a refresh Node or column test has failed, this field will return in the response with a `true`. If there are no failures, then this isn't present in the response.
+        version:
+          type: integer
+          x-stoplight:
+            id: 4aoprp4iayto3
+    SnowflakeUserCredentials:
+      description: Information about the Snowflake account used to perform a run.
+      type: object
+      additionalProperties: false
+      properties:
+        snowflakeAccount:
+          type: string
+        snowflakeAuthType:
+          $ref: '#/components/schemas/SnowflakeUserConnectionType'
+        snowflakeRole:
+          type: string
+        snowflakeUsername:
+          type: string
+        snowflakeWarehouse:
+          type: string
+      required:
+      - snowflakeAccount
+      - snowflakeAuthType
+      - snowflakeUsername
+    RunType:
+      enum:
+      - deploy
+      - refresh
+      type: string
+    DeployRunDetails:
+      type: object
+      additionalProperties: false
+      description: Deployment run details.
+      properties:
+        canceled:
+          type: boolean
+          description: If the run was canceled.
+        deployCommit:
+          type: string
+          description: The full commit hash.
+        deployCommitMessage:
+          type: string
+          description: The commit message.
+        environmentID:
+          type: string
+          description: The Environment ID for this run.
+        parallelism:
+          type: integer
+          description: The parallelism parameter determines how many nodes are processed simultaneously (in parallel) by the Snowflake compute warehouse.
+        nodesInRun:
+          type: integer
+          description: The number of Nodes deployed.
+      required:
+      - deployCommit
+      - environmentID
+    RunDetails:
+      description: Detailed information about a run.
+      anyOf:
+      - $ref: '#/components/schemas/DeployRunDetails'
+      - $ref: '#/components/schemas/RefreshRunDetails'
+    RunResultsResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          description: A collection of run results.
+          type: array
+          items:
+            $ref: '#/components/schemas/RunResult'
+    RunsOrderBy:
+      description: The field used to sort query results.
+      type: string
+      enum:
+      - id
+      - runStartTime
+      - runEndTime
+      default: id
+    RunSummary:
+      type: object
+      required:
+      - id
+      - runType
+      - runStatus
+      properties:
+        id:
+          description: The run ID.
+          type: integer
+        reRunID:
+          description: If this is a re-run, the ID of the original operation.
+          type: string
+        runStartTime:
+          description: The datetime the run started.
+          type: string
+          format: date-time
+        runEndTime:
+          description: The datetime the run ended.
+          type: string
+          format: date-time
+        runType:
+          $ref: '#/components/schemas/RunType'
+        runStatus:
+          $ref: '#/components/schemas/RunStatus'
+        environmentID:
+          description: The environment in which the run operation was applied.
+          type: string
+        runFailureReason:
+          description: Information about the cause of a run failure.
+          type: string
+        hasTestFailures:
+          type: boolean
+          x-stoplight:
+            id: dfkakolcegg1l
+          description: If a refresh Node or column test has failed, this field will return in the response with a `true`. If there are no failures, then this isn't present in the response.
+    RunsResponse:
+      description: A collection of runs.
+      type: object
+      x-examples: {}
+      required:
+      - limit
+      - orderByDirection
+      - orderBy
+      - data
+      - next
+      properties:
+        limit:
+          type: integer
+          x-stoplight:
+            id: pbkburmhwwx2z
+          description: Limit of the records returned. Some endpoints have `limit` as a query parameter.
+        orderByDirection:
+          $ref: '#/components/schemas/OrderByDirection'
+        orderBy:
+          type: string
+          x-stoplight:
+            id: qc30xyssa28bx
+          description: The field to order the results by. Only `id` allowed.
+        data:
+          description: A collection of runs.
+          anyOf:
+          - type: array
+            title: Run summary response
+            items:
+              $ref: '#/components/schemas/RunSummary'
+          - type: array
+            title: Run info response
+            items:
+              $ref: '#/components/schemas/RunInfo'
+        next:
+          type:
+          - string
+          - integer
+          - 'null'
+          x-stoplight:
+            id: 2a4at6wmdfyzt
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        errorString:
+          description: The error message.
+          type: string
+        errorDetail:
+          description: Additional detail about the error.
+          type: string
+      required:
+      - errorString
+    RunStatus:
+      enum:
+      - canceled
+      - completed
+      - failed
+      - initializing
+      - rendering
+      - running
+      - waitingToRun
+      type: string
+    SnowflakeUserConnectionType:
+      title: SnowflakeUserConnectionType
+      x-stoplight:
+        id: ntsijybn4mk4r
+      enum:
+      - Basic
+      - Cloud
+      - KeyPair
+      - OAuth
+    RunOrigins:
+      enum:
+      - API
+      - CLI
+      - UI
+      - fivetranAPI
+    DatabricksUserCredentials:
+      title: DatabricksUserCredentials
+      x-stoplight:
+        id: o8t7toju0ls63
+      type: object
+      properties:
+        id:
+          type: string
+          x-stoplight:
+            id: btr2hctlfjkea
+    ErrorResponse:
+      description: Error detail in addition to the HTTP status code and text.
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    RunResult:
+      type: object
+      additionalProperties: false
+      description: The result output describing each query processed during a run.
+      required:
+      - isRunning
+      - name
+      - nodeID
+      - queryResults
+      properties:
+        isRunning:
+          type: boolean
+          description: If the queried run is still running.
+        name:
+          type: string
+        nodeID:
+          type: string
+        hasTestFailures:
+          type: boolean
+          x-stoplight:
+            id: 2n2h892s8io4n
+          description: If a refresh Node or column test has failed, this field will return in the response with a `true`. If there are no failures, then this isn't present in the response.
+        runState:
+          type: string
+        origin:
+          $ref: '#/components/schemas/RunOrigins'
+        queryResults:
+          description: The query result returns the status of different stages such as Delete Table or Rename Table. See the queryResults name for the stage.
+          type: array
+          items:
+            $ref: '#/components/schemas/QueryResult'
+        renderQueryResult:
+          $ref: '#/components/schemas/QueryResult'
+          x-stoplight:
+            id: zyoqkazpavev0
   responses:
+    RunsResponse:
+      description: A collection of runs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RunsResponse'
+          examples: {}
+    RunResultsResponse:
+      description: A collection of results for a deploy or refresh run.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RunResultsResponse'
+          examples:
+            Run Results Response:
+              value:
+                data:
+                - isRunning: true
+                  name: string
+                  nodeID: string
+                  runState: string
+                  origin: API
+                  queryResults:
+                  - endTime: '2019-08-24T14:15:22Z'
+                    error:
+                      errorString: string
+                      errorDetail: string
+                    isRunning: true
+                    name: string
+                    queryID: string
+                    rowsDeleted: 0
+                    rowsInserted: 0
+                    rowsUpdated: 0
+                    sql: string
+                    startTime: '2019-08-24T14:15:22Z'
+                    status: string
+                    success: true
+                    warehouse: string
+                  renderQueryResult:
+                    endTime: '2019-08-24T14:15:22Z'
+                    error:
+                      errorString: string
+                      errorDetail: string
+                    isRunning: true
+                    name: string
+                    queryID: string
+                    rowsDeleted: 0
+                    rowsInserted: 0
+                    rowsUpdated: 0
+                    sql: string
+                    startTime: '2019-08-24T14:15:22Z'
+                    status: string
+                    success: true
+                    warehouse: string
+    ForbiddenError:
+      description: The client is not permitted to perform the requested operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Forbidden Error:
+              $ref: '#/components/examples/ErrorResponse'
+    NotFoundError:
+      description: The requested resource could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Not Found Error:
+              $ref: '#/components/examples/ErrorResponse'
+    GatewayTimeoutError:
+      description: The server did not receive a response in time from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Gateway Timeout Error:
+              $ref: '#/components/examples/ErrorResponse'
+    InvalidRequestError:
+      description: The request was invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Invalid Request Error:
+              $ref: '#/components/examples/ErrorResponse'
+    BadGatewayError:
+      description: The server received an error from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Bad Gateway Error:
+              $ref: '#/components/examples/ErrorResponse'
     Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
+      description: User lacks authorization to perform this action.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request
+            type: object
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/ErrorResponse'
+    InternalServerError:
+      description: The server encountered an unexpected condition that prevented it from fulfilling the request.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Internal Server Error:
+              $ref: '#/components/examples/ErrorResponse'
+    ServiceUnavailableError:
+      description: The service is currently unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Service Unavailable Error:
+              $ref: '#/components/examples/ErrorResponse'
+    RunResponse:
+      description: A single run.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RunInfo'
+          examples: {}
+  examples:
+    ErrorResponse:
+      value:
+        error:
+          errorString: string
+          errorDetail: string
   parameters:
-    startingFromParam:
-      name: startingFrom
-      in: query
-      description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
-    orderByDirectionParam:
+    orderByDirection:
       name: orderByDirection
+      description: The sort order for query results.
       in: query
-      description: Sort direction
-      required: false
       schema:
+        description: The sort order for query results.
         type: string
         enum:
         - asc
         - desc
-        default: asc
-  schemas:
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    RunResult:
-      type: object
-      properties:
-        nodeID:
-          type: string
-          description: Node identifier
-        nodeName:
-          type: string
-          description: Node name
-        status:
-          type: string
-          description: Result status for this node
-        rowsAffected:
-          type: integer
-          description: Number of rows affected
-    RunResultList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/RunResult'
-    Run:
-      type: object
-      properties:
-        runCounter:
-          type: integer
-          description: Unique run counter / ID
-        status:
-          type: string
-          description: Run status
-          enum:
-          - queued
-          - running
-          - success
-          - failed
-          - cancelled
-        environmentID:
-          type: string
-          description: Environment the run executed in
-        startedAt:
-          type: string
-          format: date-time
-          description: Timestamp when the run started
-        completedAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          description: Timestamp when the run completed
-    RunList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Run'
-    PaginatedResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items: {}
-        next:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page of results; null when exhausted
+        default: desc
+      required: false
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer
-      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.

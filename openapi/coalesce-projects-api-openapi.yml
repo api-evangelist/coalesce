@@ -1,58 +1,92 @@
 openapi: 3.2.0
 info:
+  version: 1.0.0
   title: Coalesce Projects API
-  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
-  version: '1'
-  contact:
-    name: Coalesce Support
-    email: support@coalesce.io
-    url: https://docs.coalesce.io/docs/api
-  x-api-id: coalesce-api
-  x-audience: public
+  description: REST API for performing operations with the Coalesce backend.
 servers:
-- url: https://app.coalescesoftware.io/api/v1
-  description: US (default)
-- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
-  description: US East (AWS)
-- url: https://app.eu.coalescesoftware.io/api/v1
-  description: Europe
-- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
-  description: Canada (GCP)
-- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
-  description: Australia (GCP)
+- url: https://app.coalescesoftware.io
+  description: 'Region: us-central1'
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io
+  description: 'Region: australia-southeast1 (Sydney)'
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io
+  description: 'Region: northamerica-northeast1 (Montreal)'
+- url: https://app.eu-west-2.aws.coalescesoftware.io
+  description: 'Region: eu-west-2 (London)'
+- url: https://app.eu.coalescesoftware.io
+  description: 'Region: europe-west-3 (Frankfurt)'
+- url: https://app.europe-west1.gcp.coalescesoftware.io
+  description: 'Region: europe-west-1 (Belgium)'
+- url: https://app.us-east-1.aws.coalescesoftware.io
+  description: 'Region: us-east-1 (Virginia)'
+- url: https://app.us-east-2.aws.coalescesoftware.io
+  description: 'Region: us-east-2 (Ohio)'
+- url: https://app.us-west-2.aws.coalescesoftware.io
+  description: 'Region: us-west-2 (Oregon)'
+- url: https://app.centralus.azure.coalescesoftware.io
+  description: 'Region: centralus (Iowa)'
+- url: https://app.eastus2.azure.coalescesoftware.io
+  description: 'Region: eastus2 (Virginia)'
+- url: https://app.westus2.azure.coalescesoftware.io
+  description: 'Region: westus2 (Washington)'
+- url: https://app.southcentralus.azure.coalescesoftware.io
+  description: 'Region: southcentral (San Antonio)'
+- url: https://app.us-east4.gcp.coalescesoftware.io
+  description: 'Region: us-east4 (Virginia)'
+- url: https://app.eu-central-1.aws.coalescesoftware.io
+  description: 'Region: eu-central-1 (Frankfurt)'
 security:
-- bearerAuth: []
+- BearerAuth: []
 tags:
 - name: Projects
-  description: Manage Coalesce projects
 paths:
-  /projects:
+  /api/v1/projects:
+    summary: Projects
     get:
-      operationId: listProjects
       summary: List Projects
-      description: Returns a paginated list of projects in the organization.
+      description: Returns a list of Projects in an Org.
+      operationId: GetProjectsInOrg
+      parameters:
+      - name: includeWorkspaces
+        description: Whether or not to include nested workspace data for all projects.
+        in: query
+        schema:
+          type: boolean
+        required: false
+      - name: includeJobs
+        description: Whether or not to include nested job data for all workspaces in the projects.
+        in: query
+        schema:
+          type: boolean
+        required: false
+      security:
+      - BearerAuth: []
       tags:
       - Projects
-      parameters:
-      - $ref: '#/components/parameters/limitParam'
-      - $ref: '#/components/parameters/orderByParam'
-      - $ref: '#/components/parameters/orderByDirectionParam'
-      - $ref: '#/components/parameters/startingFromParam'
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProjectList'
+          $ref: '#/components/responses/ProjectsResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
     post:
-      operationId: createProject
       summary: Create Project
-      description: Creates a new project in the organization.
+      description: Create a new Project.
+      operationId: CreateProject
+      security:
+      - BearerAuth: []
       tags:
       - Projects
       requestBody:
@@ -60,30 +94,53 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectInput'
+              $ref: '#/components/schemas/ProjectCreateRequest'
       responses:
-        '200':
-          description: Project created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Project'
+        '201':
+          $ref: '#/components/responses/ProjectResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /projects/{projectID}:
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+  /api/v1/projects/{projectID}:
+    summary: Projects
     parameters:
     - name: projectID
+      description: The project ID.
       in: path
-      required: true
-      description: Unique identifier of the project
       schema:
         type: string
+      required: true
+    - name: includeWorkspaces
+      description: Whether or not to include nested workspace data for all projects.
+      in: query
+      schema:
+        type: boolean
+      required: false
+    - name: includeJobs
+      description: Whether or not to include nested job data for all workspaces in the projects.
+      in: query
+      schema:
+        type: boolean
+      required: false
     get:
-      operationId: getProject
       summary: Get Project
-      description: Returns details for a specific project.
+      description: Return information for a single Project.
+      operationId: GetProjectInOrg
+      security:
+      - BearerAuth: []
       tags:
       - Projects
       responses:
@@ -92,15 +149,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/ProjectResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-    put:
-      operationId: updateProject
-      summary: Update Project
-      description: Updates a specific project.
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+    patch:
+      summary: Update a project
+      description: Update a existing Project.
+      operationId: UpdateProject
+      security:
+      - BearerAuth: []
       tags:
       - Projects
       requestBody:
@@ -108,137 +179,564 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectInput'
+              $ref: '#/components/schemas/ProjectPatchRequest'
       responses:
         '200':
-          description: Project updated
+          description: The project was successfully updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/ProjectResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
     delete:
-      operationId: deleteProject
       summary: Delete Project
-      description: Deletes a specific project.
+      description: Delete a Project.
+      operationId: DeleteProject
+      security:
+      - BearerAuth: []
       tags:
       - Projects
       responses:
         '204':
-          description: Project deleted
+          description: The project was successfully deleted.
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+  /api/v1/projects/{projectID}/gitAccounts:
+    summary: Projects Git Accounts
+    parameters:
+    - name: projectID
+      description: The project ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    get:
+      summary: List Project Git Accounts
+      description: Return a list of all Git accounts for a Project.
+      operationId: ListProjectGitAccounts
+      security:
+      - BearerAuth: []
+      tags:
+      - Projects
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectGitAccountsResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+  /api/v1/projects/{projectID}/gitAccounts/{userID}:
+    summary: Projects Git Accounts
+    parameters:
+    - name: projectID
+      description: The project ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    - name: userID
+      description: The user ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    get:
+      summary: Get Project Git Account
+      description: Returns a user's Git account in a Project.
+      operationId: GetProjectGitAccount
+      security:
+      - BearerAuth: []
+      tags:
+      - Projects
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectGitAccountResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+    put:
+      summary: Set Project Git Account
+      description: Add a users Git account to a Project.
+      operationId: SetProjectGitAccount
+      security:
+      - BearerAuth: []
+      tags:
+      - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectGitAccountSetRequest'
+      responses:
+        '204':
+          description: The user's git account for the project was set successfully.
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+    delete:
+      summary: Remove Project Git Account
+      description: Remove a user's Git account from a Project.
+      operationId: DeleteProjectGitAccount
+      security:
+      - BearerAuth: []
+      tags:
+      - Projects
+      responses:
+        '204':
+          description: The user's git account for the project was deleted successfully.
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
 components:
-  responses:
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  parameters:
-    startingFromParam:
-      name: startingFrom
-      in: query
-      description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
-    orderByDirectionParam:
-      name: orderByDirection
-      in: query
-      description: Sort direction
-      required: false
-      schema:
-        type: string
-        enum:
-        - asc
-        - desc
-        default: asc
   schemas:
-    Error:
+    Job:
       type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    Project:
-      type: object
+      description: ''
+      additionalProperties: true
       properties:
         id:
           type: string
-          description: Unique project identifier
+          description: The Job ID.
         name:
           type: string
-          description: Project name
+          description: The Job name.
+        includeSelector:
+          type: string
+          description: A selector string of nodes to include.
+        excludeSelector:
+          type: string
+          description: A selector string of nodes to exclude.
         createdAt:
           type: string
           format: date-time
-          description: Timestamp when the project was created
-        createdBy:
+        updatedAt:
           type: string
-          description: User who created the project
-    ProjectInput:
+          format: date-time
+      required:
+      - id
+      - name
+      - includeSelector
+      - excludeSelector
+      - createdAt
+      - updatedAt
+    WorkspaceSummary:
       type: object
+      description: ''
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        project:
+          type: string
+          description: The Project ID.
+        status:
+          $ref: '#/components/schemas/WorkspaceEnvHealth'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        jobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Job'
+      required:
+      - createdAt
+      - createdBy
+      - updatedAt
+      - id
+      - name
+      - status
+      - project
+      title: ''
+    UserSummary:
+      type: object
+      description: ''
+      additionalProperties: false
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: The user ID.
+          example: BGx8EQ1NlLXxMFwFfV5brGgLj813
+        firstName:
+          type: string
+          description: User first name.
+          example: Coalesce
+        lastName:
+          type: string
+          description: User last name.
+          example: Support
+    BaseProject:
+      type: object
+      description: ''
       required:
       - name
       properties:
-        name:
-          type: string
-          description: Project name
         description:
           type: string
-          description: Project description
-    ProjectList:
+          description: The Project description.
+          example: QA for accounting
+        gitRepoURL:
+          type: string
+          example: https://github.com/coalesceio
+          description: The Project version control URL.
+        name:
+          type: string
+          example: Coalesce
+          description: The name of the Project.
+    ProjectCreateRequest:
+      type: object
+      description: A project groups environments and workspaces for easier management and access control.
+      additionalProperties: false
+      required:
+      - platformKind
+      - name
+      properties:
+        platformKind:
+          $ref: '#/components/schemas/PlatformKind'
+        description:
+          type: string
+          description: The Project description.
+          example: QA for accounting
+        gitRepoURL:
+          type: string
+          description: The Project version control URL.
+          example: https://github.com/coalesceio
+        name:
+          type: string
+          description: The name of the Project.
+          example: Coalesce
+    Project:
+      description: ''
       allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
+      - $ref: '#/components/schemas/BaseProject'
       - type: object
+        required:
+        - createdAt
+        - updatedAt
+        - id
+        - status
         properties:
-          data:
+          createdAt:
+            type: string
+            format: date-time
+            example: '2025-05-28T15:03:10.457Z'
+            description: The time in ISO 8601 format.
+          createdBy:
+            $ref: '#/components/schemas/UserSummary'
+          updatedAt:
+            type: string
+            format: date-time
+            description: The time in ISO 8601 format.
+            example: '2024-04-11T15:36:15.181Z'
+          updatedBy:
+            $ref: '#/components/schemas/UserSummary'
+          id:
+            type: string
+            description: The Project ID.
+            example: boC3UgRYtaMjxEqv2bxPugrNCJx1
+          status:
+            $ref: '#/components/schemas/ProjectStatus'
+          workspaces:
             type: array
             items:
-              $ref: '#/components/schemas/Project'
-    PaginatedResponse:
+              $ref: '#/components/schemas/WorkspaceSummary'
+          jobs:
+            x-stoplight:
+              id: z26towufu6bwi
+            type: array
+            items:
+              $ref: '#/components/schemas/Job'
+      title: ''
+    ProjectGitAccountResponseData:
       type: object
+      required:
+      - gitAccountID
+      - userID
+      properties:
+        gitAccountID:
+          type: string
+          description: The Git account ID assigned by Coalesce.
+        userID:
+          type: string
+          description: The user ID assigned by Coalesce.
+    ProjectPatchRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        platformKind:
+          $ref: '#/components/schemas/PlatformKind'
+        description:
+          type: string
+          example: 'Regulatory reporting: SOX audits, customer due diligence (KYC), and anti-money laundering (AML) monitoring. The solution must provide complete audit trails, automated exception detection, and regulatory reporting capabilities.'
+          description: The Project description.
+        gitRepoURL:
+          type: string
+          description: The URL of the version control for the Project.
+          example: https://github.com/coalesceio
+        name:
+          type: string
+          example: Regulatory Compliance
+          description: The Project name.
+    ProjectResponse:
+      type: object
+      required:
+      - data
       properties:
         data:
+          description: Information about a project.
+          $ref: '#/components/schemas/Project'
+    ProjectGitAccountResponse:
+      $ref: '#/components/schemas/ProjectGitAccountResponseData'
+    ProjectGitAccountsResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          description: A colleciton of project git accounts
           type: array
-          items: {}
-        next:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page of results; null when exhausted
+          items:
+            $ref: '#/components/schemas/ProjectGitAccountResponseData'
+    ProjectStatus:
+      type: string
+      enum:
+      - active
+      - deleted
+    PlatformKind:
+      type: string
+      enum:
+      - snowflake
+      - databricks
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        errorString:
+          description: The error message.
+          type: string
+        errorDetail:
+          description: Additional detail about the error.
+          type: string
+      required:
+      - errorString
+    ProjectGitAccountSetRequest:
+      type: object
+      required:
+      - gitAccountID
+      properties:
+        gitAccountID:
+          type: string
+          example: 8734df52-b88e-444a-9595-9884cd214028
+          description: The Git Account ID assigned by Coalesce.
+    WorkspaceEnvHealth:
+      type: string
+      enum:
+      - Deleting
+      - Deploying
+      - Failed Deploy
+      - Failed Refresh
+      - Initializing
+      - Refreshing
+      - Waiting
+    ErrorResponse:
+      description: Error detail in addition to the HTTP status code and text.
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+  responses:
+    ForbiddenError:
+      description: The client is not permitted to perform the requested operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Forbidden Error:
+              $ref: '#/components/examples/ErrorResponse'
+    NotFoundError:
+      description: The requested resource could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Not Found Error:
+              $ref: '#/components/examples/ErrorResponse'
+    GatewayTimeoutError:
+      description: The server did not receive a response in time from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Gateway Timeout Error:
+              $ref: '#/components/examples/ErrorResponse'
+    InvalidRequestError:
+      description: The request was invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Invalid Request Error:
+              $ref: '#/components/examples/ErrorResponse'
+    ProjectsResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/components/schemas/Project'
+    ProjectResponse:
+      description: Information about a project.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Project'
+    BadGatewayError:
+      description: The server received an error from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Bad Gateway Error:
+              $ref: '#/components/examples/ErrorResponse'
+    Unauthorized:
+      description: User lacks authorization to perform this action.
+      content:
+        application/json:
+          schema:
+            type: object
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/ErrorResponse'
+    InternalServerError:
+      description: The server encountered an unexpected condition that prevented it from fulfilling the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Internal Server Error:
+              $ref: '#/components/examples/ErrorResponse'
+    ServiceUnavailableError:
+      description: The service is currently unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Service Unavailable Error:
+              $ref: '#/components/examples/ErrorResponse'
+  examples:
+    ErrorResponse:
+      value:
+        error:
+          errorString: string
+          errorDetail: string
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer
-      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.

@@ -1,313 +1,750 @@
 openapi: 3.2.0
 info:
+  version: 1.0.0
   title: Coalesce Users API
-  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
-  version: '1'
-  contact:
-    name: Coalesce Support
-    email: support@coalesce.io
-    url: https://docs.coalesce.io/docs/api
-  x-api-id: coalesce-api
-  x-audience: public
+  description: REST API for performing operations with the Coalesce backend.
 servers:
-- url: https://app.coalescesoftware.io/api/v1
-  description: US (default)
-- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
-  description: US East (AWS)
-- url: https://app.eu.coalescesoftware.io/api/v1
-  description: Europe
-- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
-  description: Canada (GCP)
-- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
-  description: Australia (GCP)
+- url: https://app.coalescesoftware.io
+  description: 'Region: us-central1'
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io
+  description: 'Region: australia-southeast1 (Sydney)'
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io
+  description: 'Region: northamerica-northeast1 (Montreal)'
+- url: https://app.eu-west-2.aws.coalescesoftware.io
+  description: 'Region: eu-west-2 (London)'
+- url: https://app.eu.coalescesoftware.io
+  description: 'Region: europe-west-3 (Frankfurt)'
+- url: https://app.europe-west1.gcp.coalescesoftware.io
+  description: 'Region: europe-west-1 (Belgium)'
+- url: https://app.us-east-1.aws.coalescesoftware.io
+  description: 'Region: us-east-1 (Virginia)'
+- url: https://app.us-east-2.aws.coalescesoftware.io
+  description: 'Region: us-east-2 (Ohio)'
+- url: https://app.us-west-2.aws.coalescesoftware.io
+  description: 'Region: us-west-2 (Oregon)'
+- url: https://app.centralus.azure.coalescesoftware.io
+  description: 'Region: centralus (Iowa)'
+- url: https://app.eastus2.azure.coalescesoftware.io
+  description: 'Region: eastus2 (Virginia)'
+- url: https://app.westus2.azure.coalescesoftware.io
+  description: 'Region: westus2 (Washington)'
+- url: https://app.southcentralus.azure.coalescesoftware.io
+  description: 'Region: southcentral (San Antonio)'
+- url: https://app.us-east4.gcp.coalescesoftware.io
+  description: 'Region: us-east4 (Virginia)'
+- url: https://app.eu-central-1.aws.coalescesoftware.io
+  description: 'Region: eu-central-1 (Frankfurt)'
 security:
-- bearerAuth: []
+- BearerAuth: []
 tags:
 - name: Users
-  description: Manage organization users and roles
 paths:
-  /users:
+  /api/v1/users:
+    summary: All users in the current org
     get:
-      operationId: listUsers
-      summary: List Organization Users
-      description: Returns a paginated list of users in the organization.
-      tags:
-      - Users
+      description: Returns a list of all users in an Org.
+      operationId: ListOrgUsers
       parameters:
-      - $ref: '#/components/parameters/limitParam'
-      - $ref: '#/components/parameters/orderByParam'
-      - $ref: '#/components/parameters/orderByDirectionParam'
-      - $ref: '#/components/parameters/startingFromParam'
+      - name: limit
+        description: The maximum number of users to return.
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 50
+        required: false
+      - name: startingFrom
+        description: The cursor point for paging the query results.
+        in: query
+        allowReserved: true
+        schema:
+          type: string
+        required: false
+      - name: orderBy
+        description: The field to order the results by.
+        in: query
+        schema:
+          type: string
+          enum:
+          - id
+          default: id
+        required: false
+      security:
+      - BearerAuth: []
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserList'
+          $ref: '#/components/responses/AllUsersResult'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /users/{userID}/roles/org:
-    parameters:
-    - name: userID
-      in: path
-      required: true
-      description: Unique identifier of the user
-      schema:
-        type: string
-    put:
-      operationId: setUserOrgRole
-      summary: Set User Organization Role
-      description: Assigns or updates a user's organization-level role.
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/AlreadyExistsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      summary: List All Organization Users
       tags:
       - Users
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RoleInput'
+  /api/v2/userRoles:
+    summary: User Roles
+    get:
+      summary: List All User Roles In Organization
+      description: Get all user roles in the organization.
+      operationId: ListAllUserRoleInOrg
+      parameters:
+      - name: projectID
+        description: Return only user roles pertaining to the specified project.
+        in: query
+        schema:
+          type: string
+        required: false
+      - name: environmentID
+        description: Return only user roles pertaining to the specified environment.
+        in: query
+        schema:
+          type: string
+        required: false
       responses:
         '200':
-          description: Role updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRole'
+          $ref: '#/components/responses/UserRoleResponseV2'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-    delete:
-      operationId: deleteUserOrgRole
-      summary: Delete User Organization Role
-      description: Removes a user's organization-level role.
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/AlreadyExistsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
       tags:
       - Users
-      responses:
-        '204':
-          description: Role removed
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-  /users/{userID}/roles/project/{projectID}:
+  /api/v2/userRoles/{userID}:
+    summary: Single User roles
     parameters:
     - name: userID
+      description: The user ID.
       in: path
-      required: true
-      description: Unique identifier of the user
       schema:
         type: string
+      required: true
     - name: projectID
-      in: path
-      required: true
-      description: Unique identifier of the project
+      description: The project ID.
+      in: query
       schema:
         type: string
-    put:
-      operationId: setUserProjectRole
-      summary: Set User Project Role
-      description: Assigns or updates a user's project-level role.
-      tags:
-      - Users
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RoleInput'
+      required: false
+    - name: environmentID
+      description: The environment ID.
+      in: query
+      schema:
+        type: string
+      required: false
+    get:
+      summary: Get a Single User's Role
+      description: Retrieve a specific user's role.
+      operationId: GetSingleUserRoles
       responses:
         '200':
-          description: Role updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRole'
+          $ref: '#/components/responses/SingleUserRoleResponseV2'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-    delete:
-      operationId: deleteUserProjectRole
-      summary: Delete User Project Role
-      description: Removes a user's project-level role.
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/AlreadyExistsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
       tags:
       - Users
-      responses:
-        '204':
-          description: Role removed
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-  /users/{userID}/roles/environment/{environmentID}:
+  /api/v2/userRoles/{userID}/organizationRole:
+    summary: Organization User Roles
     parameters:
     - name: userID
+      description: The user ID.
       in: path
-      required: true
-      description: Unique identifier of the user
       schema:
         type: string
-    - name: environmentID
-      in: path
       required: true
-      description: Unique identifier of the environment
-      schema:
-        type: string
     put:
-      operationId: setUserEnvironmentRole
-      summary: Set User Environment Role
-      description: Assigns or updates a user's environment-level role.
-      tags:
-      - Users
+      summary: Set User's Organization Role
+      description: 'Creates or updates a user''s organization role.
+
+
+        :::info
+
+
+        Available for organization admins only.
+
+
+        :::'
+      operationId: SetUsersOrgRole
       requestBody:
+        description: The user's organization role.
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoleInput'
+              type: object
+              required:
+              - organizationRole
+              properties:
+                organizationRole:
+                  enum:
+                  - admin
+                  - contributor
+                  - member
       responses:
         '200':
-          description: Role updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserRole'
+          $ref: '#/components/responses/SingleUserRoleResponseV2'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-    delete:
-      operationId: deleteUserEnvironmentRole
-      summary: Delete User Environment Role
-      description: Removes a user's environment-level role.
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/AlreadyExistsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
       tags:
       - Users
+  /api/v2/userRoles/{userID}/projects/{projectID}:
+    summary: Project User Roles
+    parameters:
+    - name: userID
+      description: The user ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    - name: projectID
+      description: The project ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    delete:
+      summary: Delete User's Project Roles
+      description: 'Deletes all project roles for a user.
+
+
+        :::info
+
+
+        Available for organization admins only.
+
+
+        :::'
+      operationId: DeleteUserProjectRole
       responses:
         '204':
-          description: Role removed
+          description: The user's project roles were successfully deleted.
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/AlreadyExistsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Users
+    put:
+      summary: Set User's Project Role
+      description: 'Creates or updates a user''s project role.
+
+
+        :::info
+
+
+        Available for organization admins only.
+
+
+        :::'
+      operationId: SetUsersProjectRole
+      requestBody:
+        description: The user project role
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - projectRole
+              properties:
+                projectRole:
+                  enum:
+                  - member
+                  - admin
+                  - contributor
+                  - architect
+      responses:
+        '200':
+          $ref: '#/components/responses/SingleUserRoleResponseV2'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/AlreadyExistsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Users
+  /api/v2/userRoles/{userID}/environments/{environmentID}:
+    summary: Environment User Roles
+    parameters:
+    - name: userID
+      description: The user ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    - name: environmentID
+      description: The environment ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    delete:
+      summary: Delete Environment User Roles
+      description: Deletes all environment roles for a user.
+      operationId: DeleteUserEnvironmentRole
+      responses:
+        '204':
+          description: The user's environment role was successfully deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/AlreadyExistsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Users
+    put:
+      summary: Set User's Environment Role
+      description: Creates or updates a user's environment role.
+      operationId: SetUsersEnvironmentRole
+      requestBody:
+        description: The user environment role.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                environmentRole:
+                  description: The environment role to set
+                  enum:
+                  - reader
+                  - admin
+                setDefaultProjectRole:
+                  description: If the user doesn't have a role for the environment's project, they will be assigned the role specified in setDefaultProjectRole. If setDefaultProjectRole is not specified and the user lacks a project role, attempting to assign an environment role will result in an HTTP 403 error.
+                  enum:
+                  - member
+                  - admin
+                  - architect
+                  - contributor
+              required:
+              - environmentRole
+      responses:
+        '200':
+          $ref: '#/components/responses/SingleUserRoleResponseV2'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/AlreadyExistsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Users
 components:
-  responses:
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  parameters:
-    startingFromParam:
-      name: startingFrom
-      in: query
-      description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
-    orderByDirectionParam:
-      name: orderByDirection
-      in: query
-      description: Sort direction
-      required: false
-      schema:
-        type: string
-        enum:
-        - asc
-        - desc
-        default: asc
-  schemas:
-    Error:
-      type: object
-      properties:
+  examples:
+    SingleUsersRole:
+      value:
+        userID: boC3UgRYtaMjxEqv2bxPugrNCJx1
+        organizationRole: admin
+        projectRoles:
+          45a4f214-8a3e-48c7-8c6b-ff284798de4c: admin
+          7e854ee0-4b7f-46ae-b79c-ace867941f11: admin
+          0d42aaab-895d-446a-9014-f4256b575ce2: admin
+          0a57c272-d602-4f5d-af23-8be96aa4aa5d: admin
+          77b53b16-baa6-49a0-9d97-a515cae50b28: admin
+          76f1cc6f-e1de-4380-8004-1c3b2e5191fd: admin
+          02c1274e-05a3-4039-a787-dd25b71950d9: admin
+          46b15547-25c3-4890-9b9e-772bbc780d0e: admin
+          6e948d90-2ef9-4680-9ed1-0600a3601c84: admin
+        environmentRoles:
+          '3': admin
+          '33': admin
+          '34': admin
+          '39': admin
+          '40': admin
+          '41': admin
+          '42': admin
+          '48': admin
+          '52': admin
+          '53': admin
+          '54': admin
+          '56': admin
+          '67': admin
+    UserRolesResponse:
+      value:
+        userRoles:
+        - userID: XV801jcwjFeKCvfqwFLOhVk2NEF2
+          organizationRole: contributor
+          projectRoles:
+            7e854ee0-4b7f-46ae-b79c-ace867941f11: member
+          environmentRoles:
+            '34': reader
+        - userID: boC3UgRYtaMjxEqv2bxPugrNCJx1
+          organizationRole: admin
+          projectRoles:
+            45a4f214-8a3e-48c7-8c6b-ff284798de4c: admin
+            7e854ee0-4b7f-46ae-b79c-ace867941f11: admin
+            0d42aaab-895d-446a-9014-f4256b575ce2: admin
+            0a57c272-d602-4f5d-af23-8be96aa4aa5d: admin
+            77b53b16-baa6-49a0-9d97-a515cae50b28: admin
+            76f1cc6f-e1de-4380-8004-1c3b2e5191fd: admin
+            02c1274e-05a3-4039-a787-dd25b71950d9: admin
+            46b15547-25c3-4890-9b9e-772bbc780d0e: admin
+            6e948d90-2ef9-4680-9ed1-0600a3601c84: admin
+          environmentRoles:
+            '3': admin
+            '33': admin
+            '34': admin
+            '39': admin
+            '40': admin
+            '41': admin
+            '42': admin
+            '48': admin
+            '52': admin
+            '53': admin
+            '54': admin
+            '56': admin
+            '67': admin
+        - userID: hBaH2n5qnAWqsUvHvsoBbChqsPf1
+          organizationRole: member
+    ErrorResponse:
+      value:
         error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    UserRole:
+          errorString: string
+          errorDetail: string
+  responses:
+    AlreadyExistsError:
+      description: The requested resource already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Example 1:
+              $ref: '#/components/examples/ErrorResponse'
+    UserRoleResponseV2:
+      description: 'Returns user role information for all users in an org.
+
+
+        '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserRoleResponseV2'
+          examples:
+            Example 1:
+              $ref: '#/components/examples/UserRolesResponse'
+    ForbiddenError:
+      description: The client is not permitted to perform the requested operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Forbidden Error:
+              $ref: '#/components/examples/ErrorResponse'
+    NotFoundError:
+      description: The requested resource could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Not Found Error:
+              $ref: '#/components/examples/ErrorResponse'
+    GatewayTimeoutError:
+      description: The server did not receive a response in time from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Gateway Timeout Error:
+              $ref: '#/components/examples/ErrorResponse'
+    InvalidRequestError:
+      description: The request was invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Invalid Request Error:
+              $ref: '#/components/examples/ErrorResponse'
+    BadGatewayError:
+      description: The server received an error from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Bad Gateway Error:
+              $ref: '#/components/examples/ErrorResponse'
+    SingleUserRoleResponseV2:
+      description: A single user's role information
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SingleUserRoleResponseV2'
+          examples:
+            Example 1:
+              $ref: '#/components/examples/SingleUsersRole'
+    Unauthorized:
+      description: User lacks authorization to perform this action.
+      content:
+        application/json:
+          schema:
+            type: object
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/ErrorResponse'
+    AllUsersResult:
+      description: The list of users
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+                description: Number of records returned.
+              startingFrom:
+                type: string
+                description: A cursor that tells the API where to begin returning results. Use it to continue pagination from a specific point in the dataset. This value must come from the `next` field in the previous response. If you define a query cursor using `startingFrom`, you must also include the `orderBy` parameter.
+              limit:
+                type: integer
+                description: The requested page size.
+              next:
+                type:
+                - string
+                - 'null'
+                description: The field value representing the start of the next page of results.
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                    id:
+                      type: string
+                    authDisabled:
+                      type: boolean
+                    deleted:
+                      type: boolean
+            required:
+            - total
+            - limit
+            - next
+            - data
+    InternalServerError:
+      description: The server encountered an unexpected condition that prevented it from fulfilling the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Internal Server Error:
+              $ref: '#/components/examples/ErrorResponse'
+    ServiceUnavailableError:
+      description: The service is currently unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Service Unavailable Error:
+              $ref: '#/components/examples/ErrorResponse'
+  schemas:
+    SingleUserRoleResponseV2:
+      $ref: '#/components/schemas/UserOrgRolesV2'
+    UserOrgRolesV2:
+      description: The roles assigned to a user.
       type: object
+      required:
+      - userID
       properties:
         userID:
           type: string
-          description: User identifier
-        role:
+          description: The user ID.
+        organizationRole:
           type: string
-          description: Assigned role name
-        scope:
+          description: User's organization role. Excluded when requesting specific environments/projects if the role lacks project permissions.
+        projectRoles:
+          type: object
+          description: 'Returns a dictionary mapping project IDs to user roles.
+
+
+            **Example:**
+
+            ```
+
+            "45a4f214-8a3e-48c7-8c6b-ff284798de4c": "admin"
+
+            ```
+
+
+            **Format:** `projectID: userRole`
+
+
+            **Note:** Only includes projects where the user has a role. Environment-only roles are excluded.'
+          additionalProperties:
+            type: string
+        environmentRoles:
+          type: object
+          description: 'Returns a dictionary mapping environment IDs to user roles.
+
+
+            **Example:**
+
+            ```
+
+            "33": "admin"
+
+            ```
+
+
+            **Format:** `environmentID: userRole`
+
+
+            **Note:** Only includes environments where the user has a role.'
+          additionalProperties:
+            type: string
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        errorString:
+          description: The error message.
           type: string
-          description: Role scope (org, project, environment)
-    RoleInput:
+        errorDetail:
+          description: Additional detail about the error.
+          type: string
+      required:
+      - errorString
+    UserRoleResponseV2:
+      type: object
+      properties:
+        userRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserOrgRolesV2'
+      required:
+      - userRoles
+      additionalProperties: false
+    ErrorResponse:
+      description: Error detail in addition to the HTTP status code and text.
       type: object
       required:
-      - role
+      - error
       properties:
-        role:
-          type: string
-          description: Role name to assign
-    UserList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/User'
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique user identifier
-        email:
-          type: string
-          format: email
-          description: User's email address
-        name:
-          type: string
-          description: User's display name
-        orgRole:
-          type: string
-          description: Organization-level role
-    PaginatedResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items: {}
-        next:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page of results; null when exhausted
+        error:
+          $ref: '#/components/schemas/Error'
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer
-      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.

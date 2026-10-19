@@ -126,18 +126,6 @@ apis:
     url: openapi/coalesce-runs-api-openapi.yml
   - type: Documentation
     url: https://docs.coalesce.io/docs/api
-- aid: coalesce:coalesce-scheduler-api
-  name: Coalesce Scheduler API
-  description: Start, stop, retry, and monitor pipeline runs
-  humanURL: https://docs.coalesce.io/docs/api
-  baseURL: https://app.coalescesoftware.io/api/v1
-  tags:
-  - Scheduler
-  properties:
-  - type: OpenAPI
-    url: openapi/coalesce-scheduler-api-openapi.yml
-  - type: Documentation
-    url: https://docs.coalesce.io/docs/api
 - aid: coalesce:coalesce-users-api
   name: Coalesce Users API
   description: Manage organization users and roles

@@ -1,65 +1,95 @@
 openapi: 3.2.0
 info:
+  version: 1.0.0
   title: Coalesce Environments API
-  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
-  version: '1'
-  contact:
-    name: Coalesce Support
-    email: support@coalesce.io
-    url: https://docs.coalesce.io/docs/api
-  x-api-id: coalesce-api
-  x-audience: public
+  description: REST API for performing operations with the Coalesce backend.
 servers:
-- url: https://app.coalescesoftware.io/api/v1
-  description: US (default)
-- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
-  description: US East (AWS)
-- url: https://app.eu.coalescesoftware.io/api/v1
-  description: Europe
-- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
-  description: Canada (GCP)
-- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
-  description: Australia (GCP)
+- url: https://app.coalescesoftware.io
+  description: 'Region: us-central1'
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io
+  description: 'Region: australia-southeast1 (Sydney)'
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io
+  description: 'Region: northamerica-northeast1 (Montreal)'
+- url: https://app.eu-west-2.aws.coalescesoftware.io
+  description: 'Region: eu-west-2 (London)'
+- url: https://app.eu.coalescesoftware.io
+  description: 'Region: europe-west-3 (Frankfurt)'
+- url: https://app.europe-west1.gcp.coalescesoftware.io
+  description: 'Region: europe-west-1 (Belgium)'
+- url: https://app.us-east-1.aws.coalescesoftware.io
+  description: 'Region: us-east-1 (Virginia)'
+- url: https://app.us-east-2.aws.coalescesoftware.io
+  description: 'Region: us-east-2 (Ohio)'
+- url: https://app.us-west-2.aws.coalescesoftware.io
+  description: 'Region: us-west-2 (Oregon)'
+- url: https://app.centralus.azure.coalescesoftware.io
+  description: 'Region: centralus (Iowa)'
+- url: https://app.eastus2.azure.coalescesoftware.io
+  description: 'Region: eastus2 (Virginia)'
+- url: https://app.westus2.azure.coalescesoftware.io
+  description: 'Region: westus2 (Washington)'
+- url: https://app.southcentralus.azure.coalescesoftware.io
+  description: 'Region: southcentral (San Antonio)'
+- url: https://app.us-east4.gcp.coalescesoftware.io
+  description: 'Region: us-east4 (Virginia)'
+- url: https://app.eu-central-1.aws.coalescesoftware.io
+  description: 'Region: eu-central-1 (Frankfurt)'
 security:
-- bearerAuth: []
+- BearerAuth: []
 tags:
 - name: Environments
-  description: Manage Coalesce deployment environments
 paths:
-  /environments:
+  /api/v1/environments:
+    summary: Environments
+    parameters: []
     get:
-      operationId: listEnvironments
       summary: List Environments
-      description: Returns a paginated list of environments in the organization.
-      tags:
-      - Environments
+      description: Retrieve a list of Environments you can access. Use the optional project query parameter to return only Environments in one Project. When project is set, paging totals and next cursors reflect the filtered set.
+      operationId: GetEnvironments
       parameters:
-      - $ref: '#/components/parameters/limitParam'
-      - $ref: '#/components/parameters/orderByParam'
-      - $ref: '#/components/parameters/orderByDirectionParam'
-      - $ref: '#/components/parameters/startingFromParam'
       - name: detail
+        description: Include the full detail of the environments.
         in: query
-        description: Whether to return full environment detail
-        required: false
         schema:
           type: boolean
           default: false
+        required: false
+      - name: project
+        description: Filter results to Environments in this Project ID. Omit or pass an empty value to return Environments across all Projects the caller can access.
+        in: query
+        schema:
+          type: string
+        required: false
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/startingFrom'
+      - $ref: '#/components/parameters/orderBy'
+      security:
+      - BearerAuth: []
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EnvironmentList'
+          $ref: '#/components/responses/EnvironmentsResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Environments
     post:
-      operationId: createEnvironment
       summary: Create Environment
-      description: Creates a new environment in the organization.
+      description: Create a new Environment in a Project. Include project, name, and oauthEnabled in the request body, plus platform connection settings for Snowflake or Databricks. This operation configures connection settings only. Add warehouse passwords or OAuth refresh tokens in the Coalesce App under Build Settings > Environments > User Credentials after creation.
+      operationId: CreateEnvironment
+      security:
+      - BearerAuth: []
       tags:
       - Environments
       requestBody:
@@ -67,47 +97,68 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EnvironmentInput'
+              $ref: '#/components/schemas/EnvironmentCreateRequest'
       responses:
-        '200':
-          description: Environment created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Environment'
+        '201':
+          $ref: '#/components/responses/EnvironmentResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /environments/{environmentID}:
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+  /api/v1/environments/{environmentID}:
+    summary: Environment
     parameters:
     - name: environmentID
+      description: The environment ID.
       in: path
-      required: true
-      description: Unique identifier of the environment
       schema:
         type: string
+      required: true
     get:
-      operationId: getEnvironment
       summary: Get Environment
-      description: Returns details for a specific environment.
-      tags:
-      - Environments
+      description: Retrieve details for a specific Environment by ID.
+      operationId: GetEnvironment
+      security:
+      - BearerAuth: []
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Environment'
+          $ref: '#/components/responses/EnvironmentResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-    put:
-      operationId: updateEnvironment
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Environments
+    patch:
       summary: Update Environment
-      description: Updates a specific environment.
+      description: Partially update an Environment by ID. Omitted fields are unchanged; null clears nullable fields. This operation configures connection metadata only. Add warehouse passwords or OAuth refresh tokens in the Coalesce App under Build Settings > Environments > User Credentials.
+      operationId: UpdateEnvironment
+      security:
+      - BearerAuth: []
       tags:
       - Environments
       requestBody:
@@ -115,143 +166,1110 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EnvironmentInput'
+              $ref: '#/components/schemas/EnvironmentPatchRequest'
       responses:
         '200':
-          description: Environment updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Environment'
+          $ref: '#/components/responses/EnvironmentResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
     delete:
-      operationId: deleteEnvironment
       summary: Delete Environment
-      description: Deletes a specific environment.
+      description: Delete an Environment by ID. This operation is destructive. Ensure the Environment has no active runs or dependent Job Schedules before you delete it. The caller needs permission to delete the target Environment.
+      operationId: DeleteEnvironment
+      security:
+      - BearerAuth: []
       tags:
       - Environments
       responses:
         '204':
-          description: Environment deleted
+          description: The Environment was successfully deleted.
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
-components:
-  responses:
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  parameters:
-    startingFromParam:
-      name: startingFrom
-      in: query
-      description: Cursor value from the previous response's `next` field for pagination
-      required: false
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+  /api/v1/environments/{environmentID}/nodes/{nodeID}:
+    summary: Node
+    parameters:
+    - name: environmentID
+      description: The environment ID.
+      in: path
       schema:
         type: string
-    orderByParam:
+      required: true
+    - name: nodeID
+      description: The node ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    get:
+      summary: Get Environment Node
+      description: Retrieve details for a specific Node by ID.
+      operationId: GetNode
+      parameters:
+      - name: detail
+        description: Include the full detail of the node.
+        in: query
+        schema:
+          type: boolean
+          default: false
+        required: false
+      - name: skipParsing
+        description: Set to `true` to skip parsing Node transforms for a faster response. Use `skipParsing=true` on its own or together with `detail=true`. Both combinations are supported. With `detail=true`, responses include full node detail but omit parsed transform data.
+        in: query
+        schema:
+          type: boolean
+          default: false
+        required: false
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/NodeResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Environments
+components:
+  parameters:
+    orderBy:
       name: orderBy
       in: query
-      description: Field name to sort results by
       required: false
       schema:
         type: string
-    limitParam:
+        default: id
+        example: id
+      description: The field to order the results by. Only `id` allowed.
+    limit:
       name: limit
       in: query
-      description: Maximum number of results to return per page
-      required: false
       schema:
         type: integer
-    orderByDirectionParam:
-      name: orderByDirection
+        default: 100
+        minimum: 1
+        maximum: 500
+      description: The maximum number of items to return. Between 1 and 500.
+    startingFrom:
+      name: startingFrom
       in: query
-      description: Sort direction
       required: false
       schema:
         type: string
-        enum:
-        - asc
-        - desc
-        default: asc
+      description: A cursor that tells the API where to begin returning results. Use it to continue pagination from a specific point in the dataset. This value must come from the `next` field in the previous response. If you define a query cursor using `startingFrom`, you must also include the `orderBy` parameter.
+      allowReserved: true
   schemas:
-    Error:
+    SQLNode:
       type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseNode'
+      additionalProperties: true
       properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    Environment:
+        config:
+          $ref: '#/components/schemas/UserConfig'
+        isMultisource:
+          type: boolean
+        materializationType:
+          $ref: '#/components/schemas/MaterializationType'
+        metadata:
+          $ref: '#/components/schemas/SQLNodeMetadata'
+        overrideSQL:
+          type: boolean
+      required:
+      - config
+      - description
+      - isMultisource
+      - locationName
+      - materializationType
+      - metadata
+      - name
+      - nodeType
+      - overrideSQL
+    MaterializationType:
+      type: string
+      enum:
+      - table
+      - view
+    TestRunOrder:
+      type: string
+      enum:
+      - After
+      - Before
+    UserSummary:
       type: object
+      description: ''
+      additionalProperties: false
+      required:
+      - id
       properties:
         id:
           type: string
-          description: Unique environment identifier
-        name:
+          description: The user ID.
+          example: BGx8EQ1NlLXxMFwFfV5brGgLj813
+        firstName:
           type: string
-          description: Environment name
-        status:
+          description: User first name.
+          example: Coalesce
+        lastName:
           type: string
-          description: Environment status
-        project:
-          type: string
-          description: Associated project ID
-        createdAt:
-          type: string
-          format: date-time
-          description: Timestamp when the environment was created
-        createdBy:
-          type: string
-          description: User who created the environment
-    EnvironmentInput:
-      type: object
-      required:
-      - name
+          description: User last name.
+          example: Support
+    SourceMap:
+      additionalProperties: false
       properties:
+        aliases:
+          $ref: '#/components/schemas/AliasToStepIDMapping'
+        customSQL:
+          $ref: '#/components/schemas/CustomSQL'
+        dependencies:
+          items:
+            $ref: '#/components/schemas/RefLink'
+          type: array
+        join:
+          $ref: '#/components/schemas/JoinCondition'
         name:
           type: string
-          description: Environment name
-        project:
-          type: string
-          description: Associated project ID
-    EnvironmentList:
+        noLinkRefs:
+          items:
+            $ref: '#/components/schemas/RefLink'
+          type: array
+      required:
+      - dependencies
+      - join
+      - name
+      - noLinkRefs
+      type: object
+    Environment:
+      description: Environments are used for deploying your data pipelines to production, test, QA, and other environments.
       allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
+      - $ref: '#/components/schemas/BaseWorkspaceEnv'
       - type: object
         properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/Environment'
-    PaginatedResponse:
+          runTimeParameters:
+            type: object
+            description: Parameters changed during deploy will not show here.
+          currentMappings:
+            $ref: '#/components/schemas/EnvironmentStorageLocationMappings'
+      - type: object
+        x-stoplight:
+          id: b58je7yplahtr
+      x-examples: {}
+      title: ''
+    SourceColumnReference:
+      anyOf:
+      - $ref: '#/components/schemas/SourceColumnReferenceV1'
+      - $ref: '#/components/schemas/SourceColumnReferenceV2'
+    EnvironmentsResponse:
       type: object
+      required:
+      - data
       properties:
         data:
-          type: array
-          items: {}
+          description: A collection of environment information.
+          anyOf:
+          - type: array
+            title: Environment response with details
+            items:
+              $ref: '#/components/schemas/Environment'
+          - type: array
+            title: Environment response summary
+            items:
+              $ref: '#/components/schemas/EnvironmentSummary'
+        total:
+          type: integer
+          description: Number of records returned.
+        startingFrom:
+          type: string
+          description: A cursor that tells the API where to begin returning results. Use it to continue pagination from a specific point in the dataset. This value must come from the `next` field in the previous response. If you define a query cursor using `startingFrom`, you must also include the `orderBy` parameter.
+        limit:
+          type: integer
+          description: Limit of the records returned. Some endpoints have `limit` as a query parameter. Default is 100.
         next:
+          type:
+          - number
+          - 'null'
+          description: The field value representing the start of the next page of results.
+    AppliedColumnTests:
+      type: object
+      description: Will return `hasNull` or `isDistinct` as true or false if testing is enabled.
+      additionalProperties:
+        type: boolean
+    HashAlgorithm:
+      type: string
+      enum:
+      - MD5
+      - SHA1
+      - SHA256
+    BaseNode:
+      type: object
+      required:
+      - description
+      - id
+      - locationName
+      - name
+      - nodeType
+      properties:
+        database:
+          type: string
+          description: The Node database name
+        description:
+          type: string
+          description: The Node description.
+        id:
+          type: string
+          description: The Node ID.
+        locationName:
+          type: string
+          description: The Storage Mapping location.
+        name:
+          type: string
+          description: The Node name.
+        nodeType:
+          $ref: '#/components/schemas/NodeType'
+        schema:
+          type: string
+          description: The Node schema name.
+    BaseWorkspaceEnv:
+      type: object
+      description: A workspace is a collection of resources that are used to develop, test, and deploy code.
+      additionalProperties: true
+      properties:
+        connectionAccount:
+          type: string
+          description: Snowflake only. The Snowflake account identifier for this environment (for example `xy12345.us-east-1`). Omit for Databricks projects.
+        accessUrl:
           type:
           - string
           - 'null'
-          description: Cursor for the next page of results; null when exhausted
+          description: Databricks only. The workspace URL for this environment (for example `https://adb-1234567890123456.7.azuredatabricks.net`). Omit for Snowflake projects.
+        defaultStorageMapping:
+          type: string
+          nullable: true
+        description:
+          type: string
+          description: The Workspace description.
+        name:
+          type: string
+          description: The Workspace name.
+        oauthEnabled:
+          type: boolean
+          description: If OAuth is enabled.
+        tagColors:
+          $ref: '#/components/schemas/TagColor'
+        project:
+          type: string
+          description: The Project ID.
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          $ref: '#/components/schemas/UserSummary'
+        updatedAt:
+          type: string
+          format: date-time
+        currentGitBranch:
+          type: string
+          description: The branch most recently run on this environment.
+        currentGitCommit:
+          type: string
+        currentGitURL:
+          type: string
+        currentlyRunningJobs:
+          description: An array of any running Jobs. If there are not Jobs running, this will return empty.
+          type: array
+          items:
+            type: integer
+        id:
+          type: string
+        deployedCommit:
+          type: string
+          description: The most recently deployed commit ID.
+        status:
+          $ref: '#/components/schemas/WorkspaceEnvHealth'
+      required:
+      - createdAt
+      - updatedAt
+      - id
+      - name
+      - oauthEnabled
+      - project
+      - status
+    IntermediateColumnRefResult:
+      additionalProperties: false
+      properties:
+        columnName:
+          type: string
+        tableName:
+          type: string
+          nullable: true
+      required:
+      - columnName
+      - tableName
+      type: object
+    UserConfig:
+      type: object
+      additionalProperties:
+        anyOf:
+        - type: object
+        - type: string
+        - type: number
+        - type: boolean
+    SQLNodeMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        appliedNodeTests:
+          default: []
+          items:
+            $ref: '#/components/schemas/NodeTest'
+          type: array
+        columns:
+          default: []
+          items:
+            $ref: '#/components/schemas/ColumnMetadata'
+          type: array
+        cteString:
+          type: string
+        description:
+          type: string
+        destinationName:
+          type: string
+        enabledColumnTestIDs:
+          type: array
+          items:
+            type: string
+        mapping:
+          type: object
+          additionalProperties:
+            anyOf:
+            - type: object
+            - type: string
+            - type: number
+            - type: boolean
+        materializationOption:
+          type: string
+        sourceMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceMap'
+      required:
+      - appliedNodeTests
+      - columns
+      - enabledColumnTestIDs
+      - sourceMapping
+    Node:
+      type: object
+      oneOf:
+      - $ref: '#/components/schemas/SourceNode'
+      - $ref: '#/components/schemas/SQLNode'
+    EnvironmentStorageLocationMappings:
+      type: object
+      description: The Storage Mapping name.
+      additionalProperties:
+        type: object
+        properties:
+          database:
+            type: string
+            description: The database name.
+          schema:
+            type: string
+            description: The database schema.
+    HashMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        hashAlgorithm:
+          $ref: '#/components/schemas/HashAlgorithm'
+        hashType:
+          enum:
+          - ChangeHash
+          - Hash
+          - HubHash
+          - LinkHash
+          - None
+          type: string
+        hubHashes:
+          items:
+            $ref: '#/components/schemas/ColumnReference'
+          type: array
+      required:
+      - hashAlgorithm
+    NodeTest:
+      type: object
+      additionalProperties: false
+      properties:
+        continueOnFailure:
+          type: boolean
+        description:
+          type: string
+        name:
+          type: string
+        runOrder:
+          $ref: '#/components/schemas/TestRunOrder'
+        templateString:
+          type: string
+      required:
+      - continueOnFailure
+      - description
+      - name
+      - runOrder
+      - templateString
+    JoinCondition:
+      type: object
+      additionalProperties: false
+      properties:
+        joinCondition:
+          type: string
+      required:
+      - joinCondition
+    NodeType:
+      anyOf:
+      - enum:
+        - Dimension
+        - Fact
+        - Hub
+        - Link
+        - Satellite
+        - Source
+        - Stage
+        - View
+        - persistentStage
+        description: Out of the box Node Types.
+      - description: Custom or Package Node ID.
+        example: externalDataPackage:::372
+      description: Either an out of the box Node or a custom Node Type ID or Package Node Type ID
+      type: string
+    CustomSQL:
+      type: object
+      additionalProperties: false
+      properties:
+        customSQL:
+          type: string
+      required:
+      - customSQL
+    SourceColumnReferenceV2:
+      type: object
+      additionalProperties: false
+      properties:
+        transform:
+          type: string
+          description: Returns the SQL of any column transformations.
+      required:
+      - transform
+    SourceColumnMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        columns:
+          items:
+            $ref: '#/components/schemas/ColumnMetadata'
+          type: array
+        join:
+          type: object
+          additionalProperties: false
+          properties:
+            joinCondition:
+              type: string
+              description: Returns SQL from the Join tab.
+          required:
+          - joinCondition
+        sourceMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceMap'
+      required:
+      - columns
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        errorString:
+          description: The error message.
+          type: string
+        errorDetail:
+          description: Additional detail about the error.
+          type: string
+      required:
+      - errorString
+    BaseEnvironment:
+      type: object
+      description: Environments are used for deploying your data pipelines to production, test, QA, and other environments.
+      additionalProperties: true
+      properties:
+        connectionAccount:
+          type: string
+          description: Snowflake only. The Snowflake account identifier for this environment (for example `xy12345.us-east-1`). Omit for Databricks projects.
+        accessUrl:
+          type:
+          - string
+          - 'null'
+          description: Databricks only. The workspace URL for this environment (for example `https://adb-1234567890123456.7.azuredatabricks.net`). Omit for Snowflake projects.
+        defaultStorageMapping:
+          type: string
+          nullable: true
+        description:
+          type: string
+          description: The Environment description.
+        name:
+          type: string
+          description: The Environment name.
+        oauthEnabled:
+          type: boolean
+          description: If OAuth is enabled.
+        runTimeParameters:
+          type: object
+          additionalProperties: true
+          description: The default Environment parameters. Parameters changed during deploy will not show here.
+        tagColors:
+          $ref: '#/components/schemas/TagColor'
+        project:
+          type: string
+      required:
+      - name
+      - oauthEnabled
+      - project
+    EnvironmentSummary:
+      type: object
+      additionalProperties: false
+      required:
+      - createdAt
+      - id
+      - name
+      - project
+      - status
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          description: The time in ISO 8601.
+        createdBy:
+          $ref: '#/components/schemas/UserSummary'
+        id:
+          type: string
+          description: The Environment ID.
+          example: boC3UgRYtaMjxEqv2bxPugrNCJx1
+        name:
+          type: string
+          description: Name of the Environment.
+          example: Coalesce
+        project:
+          type: string
+          description: The Project ID.
+          example: 7e854ee0-4b7f-46ae-b79c-ace867941f11
+        status:
+          $ref: '#/components/schemas/EnvironmentHealth'
+    ColumnReference:
+      type: object
+      additionalProperties: false
+      properties:
+        columnID:
+          type: string
+          description: Column ID of the source column.
+        nodeID:
+          type: string
+          description: Node ID of the source columm.
+      required:
+      - columnID
+      - nodeID
+    EnvironmentPatchRequest:
+      type: object
+      description: 'Partial update for an existing Environment. Omitted fields are unchanged. Set a field to null to clear nullable values such as accessUrl. Writable fields: name, description, connectionAccount, accessUrl, oauthEnabled, defaultStorageMapping, runTimeParameters, tagColors, mappings. Do not pass warehouse passwords or OAuth refresh tokens. Add credentials in the Coalesce app under Build Settings > Environments > User Credentials.'
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: The Environment name.
+        description:
+          type: string
+          description: The Environment description.
+        connectionAccount:
+          type: string
+          description: Snowflake only. The Snowflake account identifier for this environment.
+        accessUrl:
+          type:
+          - string
+          - 'null'
+          description: Databricks only. The workspace URL for this environment. Pass null to clear.
+        oauthEnabled:
+          type: boolean
+          description: If OAuth is enabled.
+        defaultStorageMapping:
+          type: string
+          nullable: true
+        runTimeParameters:
+          type: object
+          additionalProperties: true
+          description: The default Environment parameters. Parameters changed during deploy will not show here.
+        tagColors:
+          $ref: '#/components/schemas/TagColor'
+        mappings:
+          description: Optional storage location mappings. Storage mappings are normally established or updated when you deploy from a Workspace. Setting mappings only through this API may not match behavior you get from deploy.
+          $ref: '#/components/schemas/EnvironmentStorageLocationMappings'
+    RefLink:
+      type: object
+      additionalProperties: false
+      properties:
+        locationName:
+          type: string
+        nodeName:
+          type: string
+      required:
+      - locationName
+      - nodeName
+    AliasToStepIDMapping:
+      type: object
+      additionalProperties:
+        type: string
+    TagColor:
+      type: object
+      description: The tag color from the Environment settings.
+      additionalProperties: false
+      properties:
+        backgroundColor:
+          type: string
+        textColor:
+          type: string
+    SourceColumnReferenceV1:
+      type: object
+      additionalProperties: false
+      properties:
+        columnReferences:
+          items:
+            $ref: '#/components/schemas/ColumnReference'
+          type: array
+        transform:
+          type: string
+          description: Returns the SQL of any column transformations.
+      required:
+      - columnReferences
+      - transform
+    ColumnMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        appliedColumnTests:
+          $ref: '#/components/schemas/AppliedColumnTests'
+        columnID:
+          type: string
+          description: The column ID.
+        columnReferences:
+          items:
+            $ref: '#/components/schemas/IntermediateColumnRefResult'
+          type: array
+        config:
+          type: object
+          description: Returns any configuration options from the Node Config Tab.
+          additionalProperties: true
+        dataType:
+          type: string
+          description: Column data type.
+        defaultValue:
+          type: string
+          description: The default column value.
+        description:
+          type: string
+          description: The column description.
+        hashDetails:
+          $ref: '#/components/schemas/HashMetadata'
+        hashedColumns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ColumnReference'
+        isBusinessKey:
+          type: boolean
+          description: Tags the column as a business key.
+        isChangeTracking:
+          type: boolean
+          description: Tags the column as a change tracking column in type 2 dimensions.
+        isSurrogateKey:
+          type: boolean
+          description: Tags the column as a surrogate key, e.g. DIM_CUSTOMER_KEY.
+        keyColumnType:
+          type: string
+          enum:
+          - None
+          - primaryBusinessKey
+          - surrogateKey
+        name:
+          type: string
+          description: The column name.
+        nullable:
+          type: boolean
+          description: If the column can contain null values.
+        primaryKey:
+          description: Tags the column as a primary key.
+          type: boolean
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceColumnReference'
+          type: array
+        systemColumnType:
+          type: string
+          enum:
+          - None
+          - sysCreateDate
+          - sysCurrentFlag
+          - sysEndDate
+          - sysStartDate
+          - sysUpdateDate
+          - sysVersion
+        transform:
+          type: string
+        uniqueKey:
+          type: boolean
+        isSystemCreateDate:
+          type: boolean
+        isSystemUpdateDate:
+          type: boolean
+        isSystemStartDate:
+          type: boolean
+        isSystemEndDate:
+          type: boolean
+        isSystemVersion:
+          type: boolean
+        isSystemCurrentFlag:
+          type: boolean
+      required:
+      - columnID
+      - dataType
+      - description
+      - name
+      - nullable
+    EnvironmentCreateRequest:
+      type: object
+      description: Initial values to set on a newly created Environment. Required fields are project, name, and oauthEnabled. For Snowflake Environments, include connectionAccount. For Databricks Environments, include accessUrl. Do not pass warehouse passwords or OAuth refresh tokens in this request. Add credentials in the Coalesce app under Build Settings > Environments > User Credentials after creation.
+      allOf:
+      - $ref: '#/components/schemas/BaseEnvironment'
+      - type: object
+        properties:
+          mappings:
+            description: Optional storage location mappings for the new Environment. Storage mappings are normally established or updated when you deploy from a Workspace. Setting mappings only through this API may not match behavior you get from deploy.
+            $ref: '#/components/schemas/EnvironmentStorageLocationMappings'
+        additionalProperties: true
+    WorkspaceEnvHealth:
+      type: string
+      enum:
+      - Deleting
+      - Deploying
+      - Failed Deploy
+      - Failed Refresh
+      - Initializing
+      - Refreshing
+      - Waiting
+    ErrorResponse:
+      description: Error detail in addition to the HTTP status code and text.
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    EnvironmentHealth:
+      type: string
+      enum:
+      - Deleting
+      - Deploying
+      - Failed Deploy
+      - Failed Dev Run
+      - Failed Refresh
+      - Initializing
+      - Refreshing
+      - Running Dev Run
+      - Waiting
+    SourceNode:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/BaseNode'
+      additionalProperties: true
+      properties:
+        metadata:
+          $ref: '#/components/schemas/SourceColumnMetadata'
+        table:
+          type: string
+      required:
+      - description
+      - locationName
+      - metadata
+      - name
+      - nodeType
+      - table
+  responses:
+    NotFoundError:
+      description: The requested resource could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Not Found Error:
+              $ref: '#/components/examples/ErrorResponse'
+    ForbiddenError:
+      description: The client is not permitted to perform the requested operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Forbidden Error:
+              $ref: '#/components/examples/ErrorResponse'
+    GatewayTimeoutError:
+      description: The server did not receive a response in time from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Gateway Timeout Error:
+              $ref: '#/components/examples/ErrorResponse'
+    EnvironmentResponse:
+      description: Information about an environment.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Environment'
+          examples:
+            Environment Response:
+              value:
+                accessUrl: string
+                connectionAccount: string
+                defaultStorageMapping: string
+                description: string
+                name: string
+                oauthEnabled: true
+                tagColors:
+                  backgroundColor: string
+                  textColor: string
+                project: string
+                createdAt: '2019-08-24T14:15:22Z'
+                createdBy:
+                  id: string
+                  firstName: string
+                  lastName: string
+                updatedAt: '2019-08-24T14:15:22Z'
+                currentGitBranch: string
+                currentGitCommit: string
+                currentGitURL: string
+                currentlyRunningJobs:
+                - 0
+                id: string
+                deployedCommit: string
+                status: Deleting
+                runTimeParameters: {}
+                currentMappings:
+                  property1:
+                    database: string
+                    schema: string
+                  property2:
+                    database: string
+                    schema: string
+    InvalidRequestError:
+      description: The request was invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Invalid Request Error:
+              $ref: '#/components/examples/ErrorResponse'
+    BadGatewayError:
+      description: The server received an error from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Bad Gateway Error:
+              $ref: '#/components/examples/ErrorResponse'
+    EnvironmentsResponse:
+      description: A collection of environment information.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EnvironmentsResponse'
+          examples:
+            Environments Response:
+              $ref: '#/components/examples/EnvironmentsResponse'
+    NodeResponse:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Node'
+          examples:
+            Node Response:
+              value:
+                metadata:
+                  columns:
+                  - appliedColumnTests:
+                      property1: true
+                      property2: true
+                    columnID: string
+                    columnReferences:
+                    - columnName: string
+                      tableName: string
+                    config: {}
+                    dataType: string
+                    defaultValue: string
+                    description: string
+                    hashDetails:
+                      hashAlgorithm: MD5
+                      hashType: ChangeHash
+                      hubHashes:
+                      - columnID: string
+                        nodeID: string
+                    hashedColumns:
+                    - columnID: string
+                      nodeID: string
+                    isBusinessKey: true
+                    isChangeTracking: true
+                    isSurrogateKey: true
+                    keyColumnType: None
+                    name: string
+                    nullable: true
+                    primaryKey: true
+                    sources:
+                    - columnReferences:
+                      - columnID: string
+                        nodeID: string
+                      transform: string
+                    systemColumnType: None
+                    transform: string
+                    uniqueKey: true
+                  join:
+                    joinCondition: string
+                  sourceMapping:
+                  - aliases:
+                      property1: string
+                      property2: string
+                    customSQL:
+                      customSQL: string
+                    dependencies:
+                    - locationName: string
+                      nodeName: string
+                    join:
+                      joinCondition: string
+                    name: string
+                    noLinkRefs:
+                    - locationName: string
+                      nodeName: string
+                table: string
+                database: string
+                description: string
+                id: string
+                locationName: string
+                name: string
+                nodeType: Dimension
+                schema: string
+    Unauthorized:
+      description: User lacks authorization to perform this action.
+      content:
+        application/json:
+          schema:
+            type: object
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/ErrorResponse'
+    InternalServerError:
+      description: The server encountered an unexpected condition that prevented it from fulfilling the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Internal Server Error:
+              $ref: '#/components/examples/ErrorResponse'
+    ServiceUnavailableError:
+      description: The service is currently unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Service Unavailable Error:
+              $ref: '#/components/examples/ErrorResponse'
+  examples:
+    ErrorResponse:
+      value:
+        error:
+          errorString: string
+          errorDetail: string
+    EnvironmentsResponse:
+      value:
+        data:
+        - accessUrl: string
+          connectionAccount: string
+          defaultStorageMapping: string
+          description: string
+          name: string
+          oauthEnabled: true
+          tagColors:
+            backgroundColor: string
+            textColor: string
+          project: string
+          createdAt: '2019-08-24T14:15:22Z'
+          createdBy:
+            id: string
+            firstName: string
+            lastName: string
+          updatedAt: '2019-08-24T14:15:22Z'
+          currentGitBranch: string
+          currentGitCommit: string
+          currentGitURL: string
+          currentlyRunningJobs:
+          - 0
+          id: string
+          deployedCommit: string
+          status: Deleting
+          runTimeParameters: {}
+          currentMappings:
+            property1:
+              database: string
+              schema: string
+            property2:
+              database: string
+              schema: string
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer
-      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.

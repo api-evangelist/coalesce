@@ -1,89 +1,360 @@
 openapi: 3.2.0
 info:
+  version: 1.0.0
   title: Coalesce Git Accounts API
-  description: REST API for integrating with Coalesce, a unified data transformation platform built for Snowflake. Enables automation of pipeline runs, querying metadata about nodes and environments, user management, git account configuration, project management, and CI/CD integration for data warehouse transformation pipelines.
-  version: '1'
-  contact:
-    name: Coalesce Support
-    email: support@coalesce.io
-    url: https://docs.coalesce.io/docs/api
-  x-api-id: coalesce-api
-  x-audience: public
+  description: REST API for performing operations with the Coalesce backend.
 servers:
-- url: https://app.coalescesoftware.io/api/v1
-  description: US (default)
-- url: https://app.us-east-1.aws.coalescesoftware.io/api/v1
-  description: US East (AWS)
-- url: https://app.eu.coalescesoftware.io/api/v1
-  description: Europe
-- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io/api/v1
-  description: Canada (GCP)
-- url: https://app.australia-southeast1.gcp.coalescesoftware.io/api/v1
-  description: Australia (GCP)
+- url: https://app.coalescesoftware.io
+  description: 'Region: us-central1'
+- url: https://app.australia-southeast1.gcp.coalescesoftware.io
+  description: 'Region: australia-southeast1 (Sydney)'
+- url: https://app.northamerica-northeast1.gcp.coalescesoftware.io
+  description: 'Region: northamerica-northeast1 (Montreal)'
+- url: https://app.eu-west-2.aws.coalescesoftware.io
+  description: 'Region: eu-west-2 (London)'
+- url: https://app.eu.coalescesoftware.io
+  description: 'Region: europe-west-3 (Frankfurt)'
+- url: https://app.europe-west1.gcp.coalescesoftware.io
+  description: 'Region: europe-west-1 (Belgium)'
+- url: https://app.us-east-1.aws.coalescesoftware.io
+  description: 'Region: us-east-1 (Virginia)'
+- url: https://app.us-east-2.aws.coalescesoftware.io
+  description: 'Region: us-east-2 (Ohio)'
+- url: https://app.us-west-2.aws.coalescesoftware.io
+  description: 'Region: us-west-2 (Oregon)'
+- url: https://app.centralus.azure.coalescesoftware.io
+  description: 'Region: centralus (Iowa)'
+- url: https://app.eastus2.azure.coalescesoftware.io
+  description: 'Region: eastus2 (Virginia)'
+- url: https://app.westus2.azure.coalescesoftware.io
+  description: 'Region: westus2 (Washington)'
+- url: https://app.southcentralus.azure.coalescesoftware.io
+  description: 'Region: southcentral (San Antonio)'
+- url: https://app.us-east4.gcp.coalescesoftware.io
+  description: 'Region: us-east4 (Virginia)'
+- url: https://app.eu-central-1.aws.coalescesoftware.io
+  description: 'Region: eu-central-1 (Frankfurt)'
 security:
-- bearerAuth: []
+- BearerAuth: []
 tags:
 - name: Git Accounts
-  description: Manage Git account integrations
 paths:
-  /gitAccounts:
-    get:
-      operationId: listGitAccounts
-      summary: List Git Accounts
-      description: Returns a paginated list of Git accounts configured in the organization.
-      tags:
-      - Git Accounts
-      parameters:
-      - $ref: '#/components/parameters/limitParam'
-      - $ref: '#/components/parameters/orderByParam'
-      - $ref: '#/components/parameters/orderByDirectionParam'
-      - $ref: '#/components/parameters/startingFromParam'
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GitAccountList'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-    post:
-      operationId: createGitAccount
-      summary: Create Git Account
-      description: Creates a new Git account integration.
-      tags:
-      - Git Accounts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GitAccountInput'
-      responses:
-        '200':
-          description: Git account created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GitAccount'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-  /gitAccounts/{gitAccountID}:
+  /api/v1/gitAccounts:
+    summary: Git account management
     parameters:
-    - name: gitAccountID
-      in: path
-      required: true
-      description: Unique identifier of the Git account
+    - name: accountOwner
+      description: '- A requester can run all Git operations against their own account. GET, POST, GET by ID, PATCH, DELETE </br>  `accountOwner` provided:</br> - Org admins: Returns the requested Git account. </br> - Other users: Only able to request their own Git account.  </br></br>  `accountOwner` not provided: </br> - If no `accountOwner` is provided, will fallback to the requester''s account. </br> - Org admins: Returns all users'' Git accounts. </br> - Other users: Returns only the requester''s Git.'
+      in: query
       schema:
         type: string
     get:
-      operationId: getGitAccount
-      summary: Get Git Account
-      description: Returns details for a specific Git account.
+      summary: List Org Git Accounts
+      description: Returns a list of all the Git accounts in an organization.
+      operationId: ListGitAccounts
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: 'A list of Git accounts for an org.
+
+            '
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    description: Array of git accounts
+                    items:
+                      type: object
+                      required:
+                      - id
+                      - gitAccountName
+                      - gitAuthorEmail
+                      - gitAuthorName
+                      - gitUsername
+                      - accountOwner
+                      - createdBy
+                      - updatedBy
+                      - createdAt
+                      - updatedAt
+                      properties:
+                        id:
+                          type: string
+                          example: 8734df52-b88e-444a-9595-9884cd214028
+                          description: The Git account ID assigned by Coalesce.
+                        gitAccountName:
+                          type: string
+                          example: My Organization
+                          description: The account name is usually your Coalesce Org name.
+                        gitAuthorEmail:
+                          type: string
+                          example: hello@coalesce.io
+                          description: The email of the user making the commits using the version control account.
+                        gitAuthorName:
+                          type: string
+                          example: Coalesce Support
+                          description: The name of the user making the commits using the version control account.
+                        gitUsername:
+                          type: string
+                          example: coalescecio
+                          description: The username from your version control provider.
+                        accountOwner:
+                          type: object
+                          required:
+                          - id
+                          - firstName
+                          - lastName
+                          - email
+                          properties:
+                            id:
+                              type: string
+                              example: BGx8EQ1NlLXxMFwFfV5brGgLj813
+                              description: The user ID of the account owner
+                            firstName:
+                              type: string
+                              example: Coalesce
+                              description: First name of the account owner
+                            lastName:
+                              type: string
+                              example: Support
+                              description: Last name of the account owner
+                            email:
+                              type: string
+                              format: email
+                              example: hello@coalesce.io
+                              description: Email of the account owner
+                        createdBy:
+                          type: object
+                          required:
+                          - id
+                          - firstName
+                          - lastName
+                          - email
+                          properties:
+                            id:
+                              type: string
+                              example: BGx8EQ1NlLXxMFwFfV5brGgLj813
+                              description: The user ID who created this account
+                            firstName:
+                              type: string
+                              example: Coalesce
+                              description: First name of the user who created this account
+                            lastName:
+                              type: string
+                              example: Support
+                              description: Last name of the user who created this account
+                            email:
+                              type: string
+                              format: email
+                              example: hello@coalesce.io
+                              description: Email of the user who created this account
+                        updatedBy:
+                          type: object
+                          required:
+                          - id
+                          - firstName
+                          - lastName
+                          - email
+                          properties:
+                            id:
+                              type: string
+                              example: BGx8EQ1NlLXxMFwFfV5brGgLj813
+                              description: The user ID who last updated this account
+                            firstName:
+                              type: string
+                              example: Coalesce
+                              description: First name of the user who last updated this account
+                            lastName:
+                              type: string
+                              example: Support
+                              description: Last name of the user who last updated this account
+                            email:
+                              type: string
+                              format: email
+                              example: hello@coalesce.io
+                              description: Email of the user who last updated this account
+                        createdAt:
+                          type: string
+                          format: date-time
+                          example: '2025-02-04T20:52:37.312Z'
+                          description: When the Git account was created
+                        updatedAt:
+                          type: string
+                          format: date-time
+                          example: '2025-02-04T20:52:37.312Z'
+                          description: When the Git account was last updated
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Git Accounts
+    post:
+      summary: Create Git Account
+      description: Create a new Git account.
+      operationId: CreateGitAccount
+      tags:
+      - Git Accounts
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitAccountCreateRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/GitAccountResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+  /api/v1/gitAccounts/{gitAccountID}:
+    summary: Git account management
+    parameters:
+    - name: gitAccountID
+      description: The Git account ID. A requester can run all Git operations against their own account. Org admins can access all Git accounts.
+      in: path
+      schema:
+        type: string
+      required: true
+    - name: accountOwner
+      in: query
+      schema:
+        type: string
+      required: false
+      description: '- A requester can run all Git operations against their own account. GET, POST, GET by ID, PATCH, DELETE </br>  `accountOwner` provided:</br> - Org admins: Returns the requested Git account. </br> - Other users: Only able to request their own Git account.  </br></br>  `accountOwner` not provided: </br> - If no `accountOwner` is provided, will fallback to the requester''s account. </br> - Org admins: Returns all users'' Git accounts. </br> - Other users: Returns only the requester''s Git.'
+    get:
+      summary: Get a Git Account
+      description: Return information for a single Git account.
+      operationId: GetGitAccount
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GitAccountResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Git Accounts
+    patch:
+      summary: Update a Git Account
+      description: Update an existing Git Account.
+      operationId: UpdateGitAccount
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitAccountUpdateRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/GitAccountResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Git Accounts
+    delete:
+      summary: Delete Git Account
+      description: Delete an existing Git account.
+      operationId: DeleteGitAccount
+      security:
+      - BearerAuth: []
+      responses:
+        '204':
+          description: The Git account was successfully deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+      tags:
+      - Git Accounts
+  /api/v1/projects/{projectID}/gitAccounts:
+    summary: Projects Git Accounts
+    parameters:
+    - name: projectID
+      description: The project ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    get:
+      summary: List Project Git Accounts
+      description: Return a list of all Git accounts for a Project.
+      operationId: ListProjectGitAccounts
+      security:
+      - BearerAuth: []
       tags:
       - Git Accounts
       responses:
@@ -92,15 +363,75 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GitAccount'
+                $ref: '#/components/schemas/ProjectGitAccountsResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
+  /api/v1/projects/{projectID}/gitAccounts/{userID}:
+    summary: Projects Git Accounts
+    parameters:
+    - name: projectID
+      description: The project ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    - name: userID
+      description: The user ID.
+      in: path
+      schema:
+        type: string
+      required: true
+    get:
+      summary: Get Project Git Account
+      description: Returns a user's Git account in a Project.
+      operationId: GetProjectGitAccount
+      security:
+      - BearerAuth: []
+      tags:
+      - Git Accounts
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectGitAccountResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequestError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
     put:
-      operationId: updateGitAccount
-      summary: Update Git Account
-      description: Updates a specific Git account.
+      summary: Set Project Git Account
+      description: Add a users Git account to a Project.
+      operationId: SetProjectGitAccount
+      security:
+      - BearerAuth: []
       tags:
       - Git Accounts
       requestBody:
@@ -108,141 +439,292 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GitAccountInput'
+              $ref: '#/components/schemas/ProjectGitAccountSetRequest'
       responses:
-        '200':
-          description: Git account updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GitAccount'
+        '204':
+          description: The user's git account for the project was set successfully.
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
     delete:
-      operationId: deleteGitAccount
-      summary: Delete Git Account
-      description: Deletes a specific Git account integration.
+      summary: Remove Project Git Account
+      description: Remove a user's Git account from a Project.
+      operationId: DeleteProjectGitAccount
+      security:
+      - BearerAuth: []
       tags:
       - Git Accounts
       responses:
         '204':
-          description: Git account deleted
+          description: The user's git account for the project was deleted successfully.
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/InvalidRequestError'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGatewayError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeoutError'
 components:
-  responses:
-    Unauthorized:
-      description: Unauthorized - invalid or missing bearer token
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  parameters:
-    startingFromParam:
-      name: startingFrom
-      in: query
-      description: Cursor value from the previous response's `next` field for pagination
-      required: false
-      schema:
-        type: string
-    orderByParam:
-      name: orderBy
-      in: query
-      description: Field name to sort results by
-      required: false
-      schema:
-        type: string
-    limitParam:
-      name: limit
-      in: query
-      description: Maximum number of results to return per page
-      required: false
-      schema:
-        type: integer
-    orderByDirectionParam:
-      name: orderByDirection
-      in: query
-      description: Sort direction
-      required: false
-      schema:
-        type: string
-        enum:
-        - asc
-        - desc
-        default: asc
   schemas:
-    Error:
+    GitAccountUpdateRequest:
+      description: All the fields needed to update a git account
+      $ref: '#/components/schemas/GitAccountRequest'
+    UserSummary:
       type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        code:
-          type: string
-          description: Error code
-    GitAccountList:
-      allOf:
-      - $ref: '#/components/schemas/PaginatedResponse'
-      - type: object
-        properties:
-          data:
-            type: array
-            items:
-              $ref: '#/components/schemas/GitAccount'
-    GitAccountInput:
-      type: object
+      description: ''
+      additionalProperties: false
       required:
-      - provider
-      - username
-      properties:
-        provider:
-          type: string
-          description: Git provider (github, gitlab, bitbucket)
-        username:
-          type: string
-          description: Git account username
-        token:
-          type: string
-          description: Personal access token for the Git account (write-only)
-    GitAccount:
-      type: object
+      - id
       properties:
         id:
           type: string
-          description: Unique Git account identifier
-        provider:
+          description: The user ID.
+          example: BGx8EQ1NlLXxMFwFfV5brGgLj813
+        firstName:
           type: string
-          description: Git provider (e.g., github, gitlab, bitbucket)
-        username:
+          description: User first name.
+          example: Coalesce
+        lastName:
           type: string
-          description: Git account username
-        createdAt:
-          type: string
-          format: date-time
-          description: Timestamp when the account was created
-    PaginatedResponse:
+          description: User last name.
+          example: Support
+    ProjectGitAccountResponseData:
       type: object
+      required:
+      - gitAccountID
+      - userID
+      properties:
+        gitAccountID:
+          type: string
+          description: The Git account ID assigned by Coalesce.
+        userID:
+          type: string
+          description: The user ID assigned by Coalesce.
+    ProjectGitAccountResponse:
+      $ref: '#/components/schemas/ProjectGitAccountResponseData'
+    GitAccountRequest:
+      allOf:
+      - $ref: '#/components/schemas/BaseGitAccount'
+      - type: object
+        required:
+        - gitToken
+        properties:
+          gitToken:
+            type: string
+            description: The [personal access token](https://docs.coalesce.io/docs/git-integration/set-up-your-git-integration#get-a-personal-access-token-pat) from your version control provider.
+    GitAccountCreateRequest:
+      description: All the fields needed to create a git account
+      allOf:
+      - $ref: '#/components/schemas/GitAccountRequest'
+      required:
+      - gitAccountName
+      - gitAuthorEmail
+      - gitAuthorName
+      - gitUsername
+      - gitToken
+    ProjectGitAccountsResponse:
+      type: object
+      required:
+      - data
       properties:
         data:
+          description: A colleciton of project git accounts
           type: array
-          items: {}
-        next:
-          type:
-          - string
-          - 'null'
-          description: Cursor for the next page of results; null when exhausted
+          items:
+            $ref: '#/components/schemas/ProjectGitAccountResponseData'
+    BaseGitAccount:
+      type: object
+      description: The core fields for a git account
+      required:
+      - gitAccountName
+      - gitAuthorEmail
+      - gitAuthorName
+      - gitUsername
+      properties:
+        gitAccountName:
+          type: string
+          description: The account name is usually your Coalesce Org name.
+        gitAuthorEmail:
+          type: string
+          example: hello@coalesce.io
+          description: The email of the user making the commits using the version control account. This doesn't have to match the version control provider.
+        gitAuthorName:
+          type: string
+          example: Coalesce Support
+          description: The name of the user making the commits using the version control account. This doesn't have to match the version control provider.
+        gitUsername:
+          type: string
+          example: coalescecio
+          description: The username from your version control provider.
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        errorString:
+          description: The error message.
+          type: string
+        errorDetail:
+          description: Additional detail about the error.
+          type: string
+      required:
+      - errorString
+    GitAccountResponse:
+      description: All the fields needed to create a git account
+      allOf:
+      - $ref: '#/components/schemas/BaseGitAccount'
+      - type: object
+        properties:
+          id:
+            type: string
+            example: 8734df52-b88e-444a-9595-9884cd214028
+            description: The Git account ID assigned by Coalesce.
+          createdAt:
+            type: string
+            format: date-time
+            example: '2025-02-04T20:52:37.312Z'
+            description: The time in ISO 8601.
+          createdBy:
+            $ref: '#/components/schemas/UserSummary'
+          updatedAt:
+            type: string
+            format: date-time
+            description: The time in ISO 8601.
+            example: '2025-02-04T20:52:37.312Z'
+          updatedBy:
+            $ref: '#/components/schemas/UserSummary'
+          accountOwner:
+            $ref: '#/components/schemas/UserSummary'
+    ProjectGitAccountSetRequest:
+      type: object
+      required:
+      - gitAccountID
+      properties:
+        gitAccountID:
+          type: string
+          example: 8734df52-b88e-444a-9595-9884cd214028
+          description: The Git Account ID assigned by Coalesce.
+    ErrorResponse:
+      description: Error detail in addition to the HTTP status code and text.
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+  responses:
+    GitAccountResponse:
+      description: The Git account.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - data
+            properties:
+              data:
+                $ref: '#/components/schemas/GitAccountResponse'
+    ForbiddenError:
+      description: The client is not permitted to perform the requested operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Forbidden Error:
+              $ref: '#/components/examples/ErrorResponse'
+    NotFoundError:
+      description: The requested resource could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Not Found Error:
+              $ref: '#/components/examples/ErrorResponse'
+    GatewayTimeoutError:
+      description: The server did not receive a response in time from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Gateway Timeout Error:
+              $ref: '#/components/examples/ErrorResponse'
+    InvalidRequestError:
+      description: The request was invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Invalid Request Error:
+              $ref: '#/components/examples/ErrorResponse'
+    BadGatewayError:
+      description: The server received an error from an upstream system.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Bad Gateway Error:
+              $ref: '#/components/examples/ErrorResponse'
+    Unauthorized:
+      description: User lacks authorization to perform this action.
+      content:
+        application/json:
+          schema:
+            type: object
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Unauthorized:
+              $ref: '#/components/examples/ErrorResponse'
+    InternalServerError:
+      description: The server encountered an unexpected condition that prevented it from fulfilling the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Internal Server Error:
+              $ref: '#/components/examples/ErrorResponse'
+    ServiceUnavailableError:
+      description: The service is currently unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            Service Unavailable Error:
+              $ref: '#/components/examples/ErrorResponse'
+  examples:
+    ErrorResponse:
+      value:
+        error:
+          errorString: string
+          errorDetail: string
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer
-      description: Bearer token obtained from the Deploy tab in the Coalesce application. Tokens never expire and remain valid across all environments and projects.
