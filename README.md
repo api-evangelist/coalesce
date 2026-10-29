@@ -64,25 +64,164 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Coalesce is a unified data transformation platform built for Snowflake that combines transformation, cataloging, and quality monitoring. It provides REST APIs for managing projects, environments, nodes, deployments, runs, and column-level documentation in data warehouse pipelines.
+Coalesce is a unified data transformation platform built for Snowflake that combines transformation, cataloging, and quality monitoring into a single operating layer. It provides REST APIs for managing projects, environments, nodes, deployments, runs, and column-level documentation in data warehouse pipelines, enabling teams to automate runs, query metadata, and integrate Coalesce into CI/CD workflows.
 
-## Links
+**Areas:** Data Transformation · Snowflake · Data Pipeline · Data Catalog · Data Quality · Analytics · Artificial Intelligence
+
+## Coalesce on APIs.io
+
+Everything profiled for Coalesce is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/coalesce/](https://apis.io/providers/coalesce/)** — or go straight to one of the APIs or properties below.
+
+### APIs (7)
+
+- [Coalesce Environments API](https://apis.io/apis/coalesce/coalesce-environments-api/) — Manage Coalesce deployment environments
+- [Coalesce Git Accounts API](https://apis.io/apis/coalesce/coalesce-git-accounts-api/) — Manage Git account integrations
+- [Coalesce Nodes API](https://apis.io/apis/coalesce/coalesce-nodes-api/) — Manage environment and workspace nodes
+- [Coalesce Projects API](https://apis.io/apis/coalesce/coalesce-projects-api/) — Manage Coalesce projects
+- [Coalesce Runs API](https://apis.io/apis/coalesce/coalesce-runs-api/) — List and inspect pipeline run records
+- [Coalesce Scheduler API](https://apis.io/apis/coalesce/coalesce-scheduler-api/) — Start, stop, retry, and monitor pipeline runs
+- [Coalesce Users API](https://apis.io/apis/coalesce/coalesce-users-api/) — Manage organization users and roles
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Coalesce Agentic Access](https://apis.io/agentic-access/coalesce/coalesce-agentic-access/)
+
+#### JSON Schema (3)
+
+The data models the API reads and writes.
+
+- [Environment](https://apis.io/schemas/coalesce/environment/)
+- [Node](https://apis.io/schemas/coalesce/node/)
+- [Run](https://apis.io/schemas/coalesce/run/)
+
+#### JSON-LD (1)
+
+Linked-data contexts for the provider's vocabulary.
+
+- [Coalesce Context](https://apis.io/jsonld/coalesce/coalesce-context/)
+
+#### Vocabulary (1)
+
+The provider's domain terms, defined.
+
+- [Coalesce Vocabulary](https://apis.io/vocabularies/coalesce/coalesce-vocabulary/)
+
+#### Examples (2)
+
+Example requests and responses.
+
+- [List Environments](https://apis.io/examples/coalesce/list-environments/)
+- [Start Run](https://apis.io/examples/coalesce/start-run/)
+
+#### Collections (7)
+
+Postman and Open Collection request collections.
+
+- [Coalesce Environments API](https://apis.io/collections/coalesce/open-coalesce-environments-api/)
+- [Coalesce Environments Git Accounts API](https://apis.io/collections/coalesce/open-coalesce-git-accounts-api/)
+- [Coalesce Environments Nodes API](https://apis.io/collections/coalesce/open-coalesce-nodes-api/)
+- [Coalesce Environments Projects API](https://apis.io/collections/coalesce/open-coalesce-projects-api/)
+- [Coalesce Environments Runs API](https://apis.io/collections/coalesce/open-coalesce-runs-api/)
+- [Coalesce Environments Scheduler API](https://apis.io/collections/coalesce/open-coalesce-scheduler-api/)
+- [Coalesce Environments Users API](https://apis.io/collections/coalesce/open-coalesce-users-api/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [Coalesce — jsonschema rules](https://apis.io/rules/coalesce/coalesce-jsonschema-spectral-rules/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Coalesce Authentication](https://apis.io/security/coalesce/coalesce-authentication/)
+- [Coalesce Domain Security](https://apis.io/security/coalesce/coalesce-domain-security/)
+- [Coalesce Trust Center](https://apis.io/security/coalesce/coalesce-trust-center/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Coalesce Plans Pricing](https://apis.io/plans/coalesce/coalesce-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Coalesce Rate Limits](https://apis.io/rate-limits/coalesce/coalesce-rate-limits/)
+
+#### FinOps (1)
+
+What the API costs to run, by operation.
+
+- [Coalesce Finops](https://apis.io/finops/coalesce/coalesce-finops/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
 - [Website](https://coalesce.io)
 - [Documentation](https://docs.coalesce.io/docs)
-- [API Documentation](https://docs.coalesce.io/docs/api)
 - [Pricing](https://coalesce.io/product/pricing/)
-- [Status Page](https://status.coalesce.io/)
-- [Blog / Resources](https://coalesce.io/resources/)
-- [GitHub (coalesceio)](https://github.com/coalesceio)
-- [GitHub (Coalesce-Software-Inc)](https://github.com/Coalesce-Software-Inc)
-- [LinkedIn](https://www.linkedin.com/company/coalesceio)
-- [X / Twitter](https://x.com/coalesceIO)
+- [Blog](https://coalesce.io/resources/)
+- [Status](https://status.coalesce.io/)
 
-## APIs
+## API Evangelist rating
 
-- **Coalesce API** — REST API for managing environments, nodes, runs, projects, user management, and git accounts. Base URL: `https://app.coalescesoftware.io/api/v1`
+**Kin Score 35.8** — thin · rubric 0.24.0 · scored 2026-10-17
 
-## Maintainers
+| Facet | Score |
+|---|---|
+| Discoverability | 66.1 |
+| Contract quality | 60.9 |
+| Contract governance | 9.8 |
+| Operational transparency | 21.1 |
+| Developer ergonomics | 23.8 |
+| Access clarity | 26.3 |
 
-- Kin Lane (kin@apievangelist.com)
+**Agent readiness 19.6** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | — |
+| OpenAPI Examples | — |
+| Rate Limit Signal | derived (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+
+**Regulatory alignment 20.0** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/coalesce/](https://apis.io/providers/coalesce/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Coalesce: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/coalesce/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
